@@ -3,12 +3,17 @@
 
 #include "stdafx.h"
 #include "TCPFighter.h"
+#include "BaseObject.h"
+#include "PlayerObject.h"
+#include "EffectObject.h"
 
 // 전역 변수:
 HINSTANCE hInst;								// 현재 인스턴스입니다.
+CBaseObject *g_pPlayerObject;
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
+void InitialGame();
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,

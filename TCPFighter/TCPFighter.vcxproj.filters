@@ -63,6 +63,9 @@
     <ClInclude Include="PlayerObject.h">
       <Filter>헤더 파일\Content</Filter>
     </ClInclude>
+    <ClInclude Include="EffectObject.h">
+      <Filter>헤더 파일\Content</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -70,6 +73,18 @@
     </ClCompile>
     <ClCompile Include="TCPFighter.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseObject.cpp">
+      <Filter>소스 파일\Content</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerObject.cpp">
+      <Filter>소스 파일\Content</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectObject.cpp">
+      <Filter>소스 파일\Content</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameSkip.cpp">
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

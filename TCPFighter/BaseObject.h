@@ -33,7 +33,7 @@ public :
 	void SetObjectType(e_OBJECT_TYPE ObjectType);
 	void SetOldPosition(int oldX, int oldY);
 	void SetPosition(int x, int y);
-	void SetSprite(e_SPRITE sprite);
+	void SetSprite(e_SPRITE sStart, e_SPRITE sEnd);
 
 	/////////////////////////////////////////////////////////////////////////
 	// Action, Draw 가상함수
