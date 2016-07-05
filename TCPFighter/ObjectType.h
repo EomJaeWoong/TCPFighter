@@ -23,6 +23,9 @@
 #define dfDELAY_ATTACK3	4
 #define dfDELAY_EFFECT	3
 
+#define LEFT 12
+#define RIGHT 13
+
 enum e_OBJECT_TYPE
 {
 	eTYPE_PLAYER,

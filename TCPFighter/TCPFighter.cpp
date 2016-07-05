@@ -161,8 +161,8 @@ void InitialGame()
 	g_pSpriteDib->LoadDibSprite(ePLAYER_STAND_R01, L"Data\\Stand_R_01.bmp", 71, 90);
 	g_pSpriteDib->LoadDibSprite(ePLAYER_STAND_R02, L"Data\\Stand_R_02.bmp", 71, 90);
 	g_pSpriteDib->LoadDibSprite(ePLAYER_STAND_R03, L"Data\\Stand_R_03.bmp", 71, 90);
-	g_pSpriteDib->LoadDibSprite(ePLAYER_STAND_R04, L"Data\\Stand_R_04.bmp", 71, 90);
-	g_pSpriteDib->LoadDibSprite(ePLAYER_STAND_R05, L"Data\\Stand_R_05.bmp", 71, 90);
+	g_pSpriteDib->LoadDibSprite(ePLAYER_STAND_R04, L"Data\\Stand_R_02.bmp", 71, 90);
+	g_pSpriteDib->LoadDibSprite(ePLAYER_STAND_R05, L"Data\\Stand_R_01.bmp", 71, 90);
 
 	g_pSpriteDib->LoadDibSprite(ePLAYER_MOVE_L01, L"Data\\MOVE_L_01.bmp", 71, 90);
 	g_pSpriteDib->LoadDibSprite(ePLAYER_MOVE_L02, L"Data\\MOVE_L_02.bmp", 71, 90);
@@ -232,7 +232,6 @@ void InitialGame()
 	g_pPlayerObject = new CPlayerObject(TRUE);
 	g_pPlayerObject->SetPosition(100, 100);
 	gObject[0] = g_pPlayerObject;
-	gObject[0]->SetSprite(ePLAYER_STAND_L01, ePLAYER_STAND_L05, dfDELAY_STAND);
 }
 
 void Update_Game(void)
@@ -252,10 +251,10 @@ void KeyProcess()
 
 	if (g_pPlayerObject == NULL)	return;
 
-	if (GetAsyncKeyState(VK_LEFT) & 0x8001)		dwAction = dfACTION_MOVE_LL;
-	if (GetAsyncKeyState(VK_RIGHT) & 0x8001)	dwAction = dfACTION_MOVE_RR;
-	if (GetAsyncKeyState(VK_UP) & 0x8001)		dwAction = dfACTION_MOVE_DD;
-	if (GetAsyncKeyState(VK_DOWN) & 0x8001)		dwAction = dfACTION_MOVE_UU;
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)		dwAction = dfACTION_MOVE_LL;
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)	dwAction = dfACTION_MOVE_RR;
+	if (GetAsyncKeyState(VK_UP) & 0x8000)		dwAction = dfACTION_MOVE_UU;
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000)		dwAction = dfACTION_MOVE_DD;
 
 	if ((GetAsyncKeyState(VK_LEFT) & 0x8001) && (GetAsyncKeyState(VK_UP) & 0x8001))
 		dwAction = dfACTION_MOVE_LU;

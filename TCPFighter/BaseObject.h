@@ -41,7 +41,7 @@ public :
 	virtual DWORD Action(DWORD dwParam) = 0;
 	virtual void Draw(CSpriteDib *pSprite, BYTE* dypDest, int iDestWidth, int iDestHeight, int iDestPitch) = 0;
 
-private :
+protected :
 	BOOL m_bEndFrame;
 	DWORD m_dwActionInput;
 	int m_iCurX;

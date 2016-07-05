@@ -18,10 +18,10 @@ public :
 	void SetActionAttack1();
 	void SetActionAttack2();
 	void SetActionAttack3();
-	void SetActionMove();
+	void SetActionMove(DWORD actionMove);
 	void SetActionStand();
-	void SetDirection();
-	void SetHP();
+	void SetDirection(int dir);
+	void SetHP(char hp);
 
 private :
 	BOOL m_bPlayerCharacter;
