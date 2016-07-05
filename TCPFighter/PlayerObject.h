@@ -4,12 +4,12 @@
 class CPlayerObject : public CBaseObject
 {
 public :
-	CPlayerObject();
+	CPlayerObject(BOOL PlayerCharacter);
 	~CPlayerObject();
 
-	void Action();
+	DWORD Action(DWORD dwParam);
 	void ActionProc();
-	void Draw();
+	void Draw(CSpriteDib *pSprite, BYTE* dypDest, int iDestWidth, int iDestHeight, int iDestPitch);
 	void InputActionProc();
 	BOOL isPlayer();
 

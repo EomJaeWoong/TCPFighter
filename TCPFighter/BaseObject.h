@@ -10,7 +10,7 @@ public :
 	CBaseObject();
 	~CBaseObject();
 
-	void ActionInput();
+	void ActionInput(DWORD dwAction);
 	void NextFrame();
 	BOOL isEndFrame();
 
@@ -33,13 +33,13 @@ public :
 	void SetObjectType(e_OBJECT_TYPE ObjectType);
 	void SetOldPosition(int oldX, int oldY);
 	void SetPosition(int x, int y);
-	void SetSprite(e_SPRITE sStart, e_SPRITE sEnd);
+	void SetSprite(int iSpriteStart, int iSpriteMax, int iFrameDelay);
 
 	/////////////////////////////////////////////////////////////////////////
 	// Action, Draw 가상함수
 	/////////////////////////////////////////////////////////////////////////
-	virtual void Action() = 0;
-	virtual void Draw() = 0;
+	virtual DWORD Action(DWORD dwParam) = 0;
+	virtual void Draw(CSpriteDib *pSprite, BYTE* dypDest, int iDestWidth, int iDestHeight, int iDestPitch) = 0;
 
 private :
 	BOOL m_bEndFrame;
