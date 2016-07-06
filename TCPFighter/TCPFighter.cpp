@@ -265,11 +265,11 @@ void KeyProcess()
 	if ((GetAsyncKeyState(VK_RIGHT) & 0x8001) && (GetAsyncKeyState(VK_DOWN) & 0x8001))
 		dwAction = dfACTION_MOVE_RD;
 
-	if (GetAsyncKeyState(0x5A) & 0x8001)
+	if (GetAsyncKeyState(0x5A) & 0x8001 || GetAsyncKeyState(0x5A) & 1)
 		dwAction = dfACTION_ATTACK1;
-	if (GetAsyncKeyState(0x58) & 0x8001)
+	if (GetAsyncKeyState(0x58) & 0x8001 || GetAsyncKeyState(0x58) & 1)
 		dwAction = dfACTION_ATTACK2;
-	if (GetAsyncKeyState(0x43) & 0x8001)
+	if (GetAsyncKeyState(0x43) & 0x8001 || GetAsyncKeyState(0x43) & 1)
 		dwAction = dfACTION_ATTACK3;
 
 	g_pPlayerObject->ActionInput(dwAction);
