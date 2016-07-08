@@ -26,30 +26,16 @@ void CPlayerObject::ActionProc()
 	switch (m_dwActionInput){
 	case dfACTION_ATTACK1 :
 		SetActionAttack1();
-		if (m_dwActionOld != m_dwActionCur){
-			if (GetDirection() == LEFT)
-				SetSprite(ePLAYER_ATTACK1_L01, ePLAYER_ATTACK1_L_MAX, 3);
-			else if (GetDirection() == RIGHT)
-				SetSprite(ePLAYER_ATTACK1_R01, ePLAYER_ATTACK1_R_MAX, 3);
-		}
-		break;
+		if (!isEndFrame())	break;
+
 	case dfACTION_ATTACK2 :
 		SetActionAttack2();
-		if (m_dwActionOld != m_dwActionCur){
-			if (GetDirection() == LEFT)
-				SetSprite(ePLAYER_ATTACK2_L01, ePLAYER_ATTACK2_L_MAX, 4);
-			else if (GetDirection() == RIGHT)
-				SetSprite(ePLAYER_ATTACK2_R01, ePLAYER_ATTACK2_R_MAX, 4);
-		}
-		break;
+		if (!isEndFrame())	break;
+
 	case dfACTION_ATTACK3 :
 		SetActionAttack3();
-		if (m_dwActionOld != m_dwActionCur){
-			if (GetDirection() == LEFT)
-				SetSprite(ePLAYER_ATTACK3_L01, ePLAYER_ATTACK3_L_MAX, 4);
-			else if (GetDirection() == RIGHT)
-				SetSprite(ePLAYER_ATTACK3_R01, ePLAYER_ATTACK3_R_MAX, 4);
-		}
+		if (!isEndFrame())	break;
+
 		if (isEndFrame())
 		{
 			SetActionStand();
@@ -78,116 +64,46 @@ void CPlayerObject::InputActionProc()
 	{
 	case dfACTION_STAND:
 		SetActionStand();
-
-		if (m_dwActionOld != m_dwActionCur ){
-			if (m_iDirCur == LEFT){
-				SetSprite(ePLAYER_STAND_L01, ePLAYER_STAND_L_MAX, 5);
-				SetDirection(LEFT);
-			}
-			else if (m_iDirCur == RIGHT){
-				SetSprite(ePLAYER_STAND_R01, ePLAYER_STAND_R_MAX, 5);
-				SetDirection(RIGHT);
-			}
-		}
 		break;
 
 	case dfACTION_MOVE_LL :
+		SetPosition(GetCurX() - 3, GetCurY());
 		SetActionMove(dfACTION_MOVE_LL);
-		SetOldPosition(GetCurX(), GetCurY());
-		SetCurPosition(GetCurX() - 3, GetCurY());
-
-		if (m_dwActionOld != m_dwActionCur || GetDirection() == RIGHT){
-			SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
-			SetDirection(LEFT);
-		}
 		break;
 
 	case dfACTION_MOVE_RR :
+		SetPosition(GetCurX() + 3, GetCurY());
 		SetActionMove(dfACTION_MOVE_RR);
-		SetOldPosition(GetCurX(), GetCurY());
-		SetCurPosition(GetCurX() + 3, GetCurY());
-
-		if (m_dwActionOld != m_dwActionCur || GetDirection() == LEFT){
-			SetSprite(ePLAYER_MOVE_R01, ePLAYER_MOVE_R_MAX, 4);
-			SetDirection(RIGHT);
-		}
 		break;
 
 	case dfACTION_MOVE_DD:
+		SetPosition(GetCurX(), GetCurY() + 3);
 		SetActionMove(dfACTION_MOVE_DD);
-		SetOldPosition(GetCurX(), GetCurY());
-		SetCurPosition(GetCurX(), GetCurY() + 3);
-
-		if (m_dwActionOld != m_dwActionCur){
-			if (m_iDirOld == LEFT){
-				SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
-				SetDirection(LEFT);
-			}
-			else if (m_iDirOld == RIGHT){
-				SetSprite(ePLAYER_MOVE_R01, ePLAYER_MOVE_R_MAX, 4);
-				SetDirection(RIGHT);
-			}
-		}
 		break;
-	case dfACTION_MOVE_UU :
-		SetActionMove(dfACTION_MOVE_UU);
-		SetOldPosition(GetCurX(), GetCurY());
-		SetCurPosition(GetCurX(), GetCurY() - 3);
 
-		if (m_dwActionOld != m_dwActionCur){
-			if (m_iDirOld == LEFT){
-				SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
-				SetDirection(LEFT);
-			}
-			else if (m_iDirOld == RIGHT){
-				SetSprite(ePLAYER_MOVE_R01, ePLAYER_MOVE_R_MAX, 4);
-				SetDirection(RIGHT);
-			}
-		}
+	case dfACTION_MOVE_UU :
+		SetPosition(GetCurX(), GetCurY() - 3);
+		SetActionMove(dfACTION_MOVE_UU);
 		break;
 
 	case dfACTION_MOVE_LD :
+		SetPosition(GetCurX() - 3, GetCurY() + 3);
 		SetActionMove(dfACTION_MOVE_LD);
-		SetOldPosition(GetCurX(), GetCurY());
-		SetCurPosition(GetCurX() - 3, GetCurY() + 3);
-
-		if (m_dwActionOld != m_dwActionCur && m_dwActionOld == dfACTION_STAND){
-			SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
-			SetDirection(LEFT);
-		}
 		break;
 
 	case dfACTION_MOVE_LU :
+		SetPosition(GetCurX() - 3, GetCurY() - 3);
 		SetActionMove(dfACTION_MOVE_LU);
-		SetOldPosition(GetCurX(), GetCurY());
-		SetCurPosition(GetCurX() - 3, GetCurY() - 3);
-
-		if (m_dwActionOld != m_dwActionCur && m_dwActionOld == dfACTION_STAND){
-			SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
-			SetDirection(LEFT);
-		}
 		break;
 
 	case dfACTION_MOVE_RD :
+		SetPosition(GetCurX() + 3, GetCurY() + 3);
 		SetActionMove(dfACTION_MOVE_RD);
-		SetOldPosition(GetCurX(), GetCurY());
-		SetCurPosition(GetCurX() + 3, GetCurY() + 3);
-
-		if (m_dwActionOld != m_dwActionCur && m_dwActionOld == dfACTION_STAND){
-			SetSprite(ePLAYER_MOVE_R01, ePLAYER_MOVE_R_MAX, 4);
-			SetDirection(RIGHT);
-		}
 		break;
 
 	case dfACTION_MOVE_RU :
+		SetPosition(GetCurX() + 3, GetCurY() - 3);
 		SetActionMove(dfACTION_MOVE_RU);
-		SetOldPosition(GetCurX(), GetCurY());
-		SetCurPosition(GetCurX() + 3, GetCurY() - 3);
-
-		if (m_dwActionOld != m_dwActionCur && m_dwActionOld == dfACTION_STAND){
-			SetSprite(ePLAYER_MOVE_R01, ePLAYER_MOVE_R_MAX, 4);
-			SetDirection(RIGHT);
-		}
 		break;
 	}
 }
@@ -207,38 +123,82 @@ void CPlayerObject::SetActionAttack1()
 { 
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK1;
+
+	if (m_dwActionOld != m_dwActionCur){
+		if (GetDirection() == LEFT)
+			SetSprite(ePLAYER_ATTACK1_L01, ePLAYER_ATTACK1_L_MAX, 3);
+		else if (GetDirection() == RIGHT)
+			SetSprite(ePLAYER_ATTACK1_R01, ePLAYER_ATTACK1_R_MAX, 3);
+	}
 }
 
 void CPlayerObject::SetActionAttack2()	
 {
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK2;
+
+	if (m_dwActionOld != m_dwActionCur){
+		if (GetDirection() == LEFT)
+			SetSprite(ePLAYER_ATTACK2_L01, ePLAYER_ATTACK2_L_MAX, 4);
+		else if (GetDirection() == RIGHT)
+			SetSprite(ePLAYER_ATTACK2_R01, ePLAYER_ATTACK2_R_MAX, 4);
+	}
 }
 
 void CPlayerObject::SetActionAttack3()	
 {
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK3;
+	if (m_dwActionOld != m_dwActionCur){
+		if (GetDirection() == LEFT)
+			SetSprite(ePLAYER_ATTACK3_L01, ePLAYER_ATTACK3_L_MAX, 4);
+		else if (GetDirection() == RIGHT)
+			SetSprite(ePLAYER_ATTACK3_R01, ePLAYER_ATTACK3_R_MAX, 4);
+	}
+
 }
 
+/*---------------------------------------------------------------------------------------------*/
+// Player Move Setting
+/*---------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetActionMove(DWORD actionMove)		
 {
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = actionMove;
+
+	if (GetCurX() > GetOldX())			SetDirection(RIGHT);
+	else if (GetCurX() < GetOldX())		SetDirection(LEFT);
+
+	if (m_dwActionOld == dfACTION_STAND || GetDirection() != m_iDirOld){
+		if (m_iDirCur == RIGHT)			SetSprite(ePLAYER_MOVE_R01, ePLAYER_MOVE_R_MAX, 4);
+		else if (m_iDirCur == LEFT) 	SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
+	}
 }
 
+/*---------------------------------------------------------------------------------------------*/
+// Player Stand Setting
+/*---------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetActionStand()	
 {
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_STAND;
+
+	if (m_iDirCur == LEFT)			SetSprite(ePLAYER_STAND_L01, ePLAYER_STAND_L_MAX, 5);
+	else if (m_iDirCur == RIGHT)	SetSprite(ePLAYER_STAND_R01, ePLAYER_STAND_R_MAX, 5);
 }
 
+/*---------------------------------------------------------------------------------------------*/
+// Player Direction Setting
+/*---------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetDirection(int dir)		
 {
 	m_iDirOld = m_iDirCur;
 	m_iDirCur = dir;
 }
 
+/*---------------------------------------------------------------------------------------------*/
+// Player HP Setting
+/*---------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetHP(char hp)				
 {
 	m_chHP = hp;
