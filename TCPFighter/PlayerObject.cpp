@@ -183,8 +183,10 @@ void CPlayerObject::SetActionStand()
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_STAND;
 
-	if (m_iDirCur == LEFT)			SetSprite(ePLAYER_STAND_L01, ePLAYER_STAND_L_MAX, 5);
-	else if (m_iDirCur == RIGHT)	SetSprite(ePLAYER_STAND_R01, ePLAYER_STAND_R_MAX, 5);
+	if (m_dwActionOld != dfACTION_STAND){
+		if (m_iDirCur == LEFT)			SetSprite(ePLAYER_STAND_L01, ePLAYER_STAND_L_MAX, 5);
+		else if (m_iDirCur == RIGHT)	SetSprite(ePLAYER_STAND_R01, ePLAYER_STAND_R_MAX, 5);
+	}
 }
 
 /*---------------------------------------------------------------------------------------------*/
