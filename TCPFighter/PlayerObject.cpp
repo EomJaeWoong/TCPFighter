@@ -23,25 +23,36 @@ DWORD CPlayerObject::Action(DWORD dwParam)
 
 void CPlayerObject::ActionProc()
 {
-	switch (m_dwActionInput){
+	// 공격이 안끝났을 때
+	if ((m_dwActionCur == dfACTION_ATTACK1 || m_dwActionCur == dfACTION_ATTACK2 || m_dwActionCur == dfACTION_ATTACK3)
+		&& (!isEndFrame()))
+	{
+		m_dwActionInput = m_dwActionCur;
+		return;
+	}
+
+	// 공격이 끝났을 때
+	else if ((m_dwActionCur == dfACTION_ATTACK1 || m_dwActionCur == dfACTION_ATTACK2 || m_dwActionCur == dfACTION_ATTACK3)
+		&& isEndFrame())
+	{
+		SetActionStand();
+		m_dwActionInput = dfACTION_STAND;
+	}
+
+	switch (m_dwActionInput)
+	{
 	case dfACTION_ATTACK1 :
 		SetActionAttack1();
-		if (!isEndFrame())	break;
+		break;
 
 	case dfACTION_ATTACK2 :
 		SetActionAttack2();
-		if (!isEndFrame())	break;
+		break;
 
 	case dfACTION_ATTACK3 :
 		SetActionAttack3();
-		if (!isEndFrame())	break;
-
-		if (isEndFrame())
-		{
-			SetActionStand();
-			m_dwActionInput = dfACTION_STAND;
-		}
 		break;
+
 	default :
 		InputActionProc();
 		break;
