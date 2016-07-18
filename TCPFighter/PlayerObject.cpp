@@ -61,7 +61,11 @@ void CPlayerObject::ActionProc()
 
 void CPlayerObject::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth, int iDestHeight, int iDestPitch)
 {
-	pSprite->DrawSprite(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
+	if (m_bPlayerCharacter)
+		pSprite->DrawSpriteRed(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
+		iDestHeight, iDestPitch);
+	else
+		pSprite->DrawSprite(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
 		iDestHeight, iDestPitch);
 }
 

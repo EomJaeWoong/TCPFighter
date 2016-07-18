@@ -41,7 +41,7 @@ void CBaseObject::NextFrame()
 			m_bEndFrame = TRUE;
 		}
 	}
-	Sleep(50);
+	Sleep(10);
 }
 
 BOOL CBaseObject::isEndFrame()

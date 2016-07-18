@@ -183,13 +183,161 @@ void CSpriteDib::DrawSprite(int iSpriteIndex, int iDrawX, int iDrawY, BYTE *bypD
 void CSpriteDib::DrawSprite50(int iSpriteIndex, int iDrawX, int iDrawY, BYTE *bypDest,
 	int iDestWidth, int iDestHeight, int iDestPitch)
 {
+	//////////////////////////////////////////////////////////////////////////////
+	// 이미지 포인터
+	//////////////////////////////////////////////////////////////////////////////
+	DWORD *pSrc = (DWORD*)m_stpSprite[iSpriteIndex].byplmage;
+	DWORD *pDest = (DWORD*)bypDest + (iDrawX + (iDrawY * iDestWidth)) -
+		(m_stpSprite[iSpriteIndex].iCenterPointX + (m_stpSprite[iSpriteIndex].iCenterPointY * iDestWidth));
+	BYTE *pDestOrigin = (BYTE*)pDest;
+	BYTE *pSrcOrigin = (BYTE*)pSrc;
 
+	//////////////////////////////////////////////////////////////////////////////
+	// 클리핑 변수
+	//////////////////////////////////////////////////////////////////////////////
+
+	int iDrawPosX = iDrawX - m_stpSprite[iSpriteIndex].iCenterPointX;
+	int iDrawPosY = iDrawY - m_stpSprite[iSpriteIndex].iCenterPointY;
+	int iSpriteWidth = m_stpSprite[iSpriteIndex].iWidth;
+	int iSpriteHeight = m_stpSprite[iSpriteIndex].iHeight;
+
+	if (iSpriteIndex >= m_iMaxSprite || m_stpSprite->byplmage == NULL)	return;
+
+	//////////////////////////////////////////////////////////////////////////////
+	// 클리핑 처리
+	//////////////////////////////////////////////////////////////////////////////
+
+	if (iDrawPosX < 0)													//왼쪽
+	{
+		iDrawPosX = abs(iDrawPosX);
+		iSpriteWidth -= iDrawPosX;
+		pSrcOrigin = (BYTE*)(pSrc + iDrawPosX);
+		pDestOrigin = (BYTE*)(pDest + iDrawPosX);
+	}
+
+	if (iDrawPosX + m_stpSprite[iSpriteIndex].iWidth > iDestWidth)		//오른쪽
+	{
+		iSpriteWidth = iDestWidth - iDrawPosX;
+	}
+
+	if (iDrawPosY < 0)													//위	-> 제작중
+	{
+		iDrawPosY = abs(iDrawPosY);
+		iSpriteHeight -= iDrawPosY;
+		pSrcOrigin = (BYTE*)(pSrc + (iDrawPosY * iSpriteWidth));
+		pDestOrigin = (BYTE*)(pDest + (iDrawPosY * iDestWidth));
+	}
+
+	if (iDrawPosY + m_stpSprite[iSpriteIndex].iHeight > iDestHeight)	//아래
+	{
+		iSpriteHeight = iDestHeight - iDrawPosY;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// 그림 그리기
+	//////////////////////////////////////////////////////////////////////////////
+	for (int iCntHeight = 0; iCntHeight < iSpriteHeight; iCntHeight++)
+	{
+		pDest = (DWORD*)pDestOrigin;
+		pSrc = (DWORD*)pSrcOrigin;
+		for (int iCntWidth = 0; iCntWidth < iSpriteWidth; iCntWidth++)
+		{
+			if ((*pSrc & 0x00ffffff) != 0x00ffffff)
+			{
+				*((BYTE*)pDest + 0) = *((BYTE*)pSrc + 0) / 2 + *((BYTE*)pDest + 0) / 2;
+				*((BYTE*)pDest + 1) = *((BYTE*)pSrc + 1) / 2 + *((BYTE*)pDest + 1) / 2;
+				*((BYTE*)pDest + 2) = *((BYTE*)pSrc + 2) / 2 + *((BYTE*)pDest + 2) / 2;
+				*((BYTE*)pDest + 3) = *((BYTE*)pSrc + 3) / 2 + *((BYTE*)pDest + 3) / 2;
+				//*pDest = *pSrc;
+			}
+
+			pDest++;
+			pSrc++;
+		}
+
+		pDestOrigin += iDestPitch;
+		pSrcOrigin += m_stpSprite[iSpriteIndex].iPitch;
+	}
 }
 
 void CSpriteDib::DrawSpriteRed(int iSpriteIndex, int iDrawX, int iDrawY, BYTE *bypDest,
 	int iDestWidth, int iDestHeight, int iDestPitch)
 {
+	//////////////////////////////////////////////////////////////////////////////
+	// 이미지 포인터
+	//////////////////////////////////////////////////////////////////////////////
+	DWORD *pSrc = (DWORD*)m_stpSprite[iSpriteIndex].byplmage;
+	DWORD *pDest = (DWORD*)bypDest + (iDrawX + (iDrawY * iDestWidth)) -
+		(m_stpSprite[iSpriteIndex].iCenterPointX + (m_stpSprite[iSpriteIndex].iCenterPointY * iDestWidth));
+	BYTE *pDestOrigin = (BYTE*)pDest;
+	BYTE *pSrcOrigin = (BYTE*)pSrc;
 
+	//////////////////////////////////////////////////////////////////////////////
+	// 클리핑 변수
+	//////////////////////////////////////////////////////////////////////////////
+
+	int iDrawPosX = iDrawX - m_stpSprite[iSpriteIndex].iCenterPointX;
+	int iDrawPosY = iDrawY - m_stpSprite[iSpriteIndex].iCenterPointY;
+	int iSpriteWidth = m_stpSprite[iSpriteIndex].iWidth;
+	int iSpriteHeight = m_stpSprite[iSpriteIndex].iHeight;
+
+	if (iSpriteIndex >= m_iMaxSprite || m_stpSprite->byplmage == NULL)	return;
+
+	//////////////////////////////////////////////////////////////////////////////
+	// 클리핑 처리
+	//////////////////////////////////////////////////////////////////////////////
+
+	if (iDrawPosX < 0)													//왼쪽
+	{
+		iDrawPosX = abs(iDrawPosX);
+		iSpriteWidth -= iDrawPosX;
+		pSrcOrigin = (BYTE*)(pSrc + iDrawPosX);
+		pDestOrigin = (BYTE*)(pDest + iDrawPosX);
+	}
+
+	if (iDrawPosX + m_stpSprite[iSpriteIndex].iWidth > iDestWidth)		//오른쪽
+	{
+		iSpriteWidth = iDestWidth - iDrawPosX;
+	}
+
+	if (iDrawPosY < 0)													//위	-> 제작중
+	{
+		iDrawPosY = abs(iDrawPosY);
+		iSpriteHeight -= iDrawPosY;
+		pSrcOrigin = (BYTE*)(pSrc + (iDrawPosY * iSpriteWidth));
+		pDestOrigin = (BYTE*)(pDest + (iDrawPosY * iDestWidth));
+	}
+
+	if (iDrawPosY + m_stpSprite[iSpriteIndex].iHeight > iDestHeight)	//아래
+	{
+		iSpriteHeight = iDestHeight - iDrawPosY;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// 그림 그리기
+	//////////////////////////////////////////////////////////////////////////////
+	for (int iCntHeight = 0; iCntHeight < iSpriteHeight; iCntHeight++)
+	{
+		pDest = (DWORD*)pDestOrigin;
+		pSrc = (DWORD*)pSrcOrigin;
+		for (int iCntWidth = 0; iCntWidth < iSpriteWidth; iCntWidth++)
+		{
+			if ((*pSrc & 0x00ffffff) != 0x00ffffff)
+			{
+				*((BYTE*)pDest + 0) = *((BYTE*)pSrc + 0) / 2;
+				*((BYTE*)pDest + 1) = *((BYTE*)pSrc + 1) / 2;
+				*((BYTE*)pDest + 2) = *((BYTE*)pSrc + 2);
+				*((BYTE*)pDest + 3) = *((BYTE*)pSrc + 3);
+				//*pDest = *pSrc;
+			}
+
+			pDest++;
+			pSrc++;
+		}
+
+		pDestOrigin += iDestPitch;
+		pSrcOrigin += m_stpSprite[iSpriteIndex].iPitch;
+	}
 }
 
 void CSpriteDib::DrawImage(int iSpriteIndex, int iDrawX, int iDrawY, BYTE *bypDest,
