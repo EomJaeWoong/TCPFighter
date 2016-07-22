@@ -18,11 +18,13 @@ CBaseObject *g_pPlayerObject;
 CBaseObject *gObject[MAX_OBJECT];
 CScreenDib g_cScreenDib(640, 480, 32);
 CSpriteDib *g_pSpriteDib;
+SOCKET client_sock;
 BOOL g_bActiveApp;
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 void InitialGame();
+BOOL InitialNetwork();
 void Update_Game(void);
 void KeyProcess();
 void Action();
@@ -57,7 +59,14 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 	
+	if (!InitialNetwork())
+	{
+		MessageBox(g_hWnd, L"Network", NULL, 0);
+		return FALSE;
+	}
+
 	InitialGame();
+
 	g_hWnd = CreateWindow(L"TCPFighter", L"TCPFighter", WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 640, 480, NULL, NULL, hInstance, NULL);
 
@@ -143,6 +152,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
+}
+
+BOOL InitialNetwork()
+{
+	int retval;
+	WSADATA wsa;
+
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+		return FALSE;
+
+	client_sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (client_sock == INVALID_SOCKET)
+		return FALSE;
+
+	SOCKADDR_IN sockaddr;
+	sockaddr.sin_family = AF_INET;
+	sockaddr.sin_port = htons(5000);
+	InetPton(AF_INET, L"127.0.0.1", &sockaddr.sin_addr.s_addr);
+
+	retval = connect(client_sock, (SOCKADDR *)&sockaddr, sizeof(sockaddr));
+	if (retval == SOCKET_ERROR)		return FALSE;
 }
 
 void InitialGame()
