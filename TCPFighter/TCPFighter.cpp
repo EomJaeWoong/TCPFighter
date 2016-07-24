@@ -8,6 +8,7 @@
 #include "BaseObject.h"
 #include "PlayerObject.h"
 #include "EffectObject.h"
+#include "FrameSkip.h"
 
 #define MAX_OBJECT 100
 
@@ -18,13 +19,12 @@ CBaseObject *g_pPlayerObject;
 CBaseObject *gObject[MAX_OBJECT];
 CScreenDib g_cScreenDib(640, 480, 32);
 CSpriteDib *g_pSpriteDib;
-SOCKET client_sock;
+CFrameSkip g_FrameSkip(50);
 BOOL g_bActiveApp;
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 void InitialGame();
-BOOL InitialNetwork();
 void Update_Game(void);
 void KeyProcess();
 void Action();
@@ -154,27 +154,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-BOOL InitialNetwork()
-{
-	int retval;
-	WSADATA wsa;
-
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-		return FALSE;
-
-	client_sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (client_sock == INVALID_SOCKET)
-		return FALSE;
-
-	SOCKADDR_IN sockaddr;
-	sockaddr.sin_family = AF_INET;
-	sockaddr.sin_port = htons(5000);
-	InetPton(AF_INET, L"127.0.0.1", &sockaddr.sin_addr.s_addr);
-
-	retval = connect(client_sock, (SOCKADDR *)&sockaddr, sizeof(sockaddr));
-	if (retval == SOCKET_ERROR)		return FALSE;
-}
-
 void InitialGame()
 {
 	g_pSpriteDib = new CSpriteDib(eSPRITE_MAX, 0x00ffffff);
@@ -270,9 +249,11 @@ void Update_Game(void)
 		KeyProcess();
 
 	Action();
-	Draw();
-
-	g_cScreenDib.DrawBuffer(g_hWnd);
+	if (g_FrameSkip.FrameSkip())
+	{
+		Draw();
+		g_cScreenDib.DrawBuffer(g_hWnd);
+	}
 }
 
 void KeyProcess()

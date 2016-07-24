@@ -61,12 +61,12 @@ void CPlayerObject::ActionProc()
 
 void CPlayerObject::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth, int iDestHeight, int iDestPitch)
 {
-	if (m_bPlayerCharacter)
-		pSprite->DrawSpriteRed(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
+	pSprite->DrawSprite50(eSHADOW, GetCurX(), GetCurY(), bypDest, iDestWidth,
 		iDestHeight, iDestPitch);
-	else
-		pSprite->DrawSprite(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
+	pSprite->DrawSpriteRed(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
 		iDestHeight, iDestPitch);
+	pSprite->DrawSprite(eGUAGE_HP, GetCurX() - 35, GetCurY() + 9, bypDest, iDestWidth,
+		iDestHeight, iDestPitch, m_chHP);
 }
 
 /*-----------------------------------------------------------------------------------------------------------

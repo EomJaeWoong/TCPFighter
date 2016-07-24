@@ -4,15 +4,15 @@
 class CFrameSkip
 {
 public :
-	CFrameSkip();
+	CFrameSkip(int iMaxFPS);
 	~CFrameSkip();
-	void FrameSkip();
+	BOOL FrameSkip();
 
 private :
 	int m_dwSystemTick;
 	int m_iMaxFPS;
 	int m_iOneFrameTick;
-	int i_iTick;
+	int m_iTick;
 };
 
 #endif

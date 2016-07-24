@@ -24,3 +24,4 @@
 #include "eSprite.h"
 #include "ObjectType.h"
 #include "SpriteDib.h"
+#include "Network.h"
