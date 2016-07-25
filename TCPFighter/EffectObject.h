@@ -4,7 +4,7 @@
 class CEffectObject : public CBaseObject
 {
 public :
-	CEffectObject();
+	CEffectObject(int iObjectID, int iObjectType);
 	~CEffectObject();
 
 	void Action();

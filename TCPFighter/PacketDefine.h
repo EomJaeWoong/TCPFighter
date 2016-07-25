@@ -31,7 +31,6 @@
 	BYTE	byType;			// 패킷타입.
 	BYTE	byTemp;			// 사용안함.
 */
-
 struct st_NETWORK_PACKET_HEADER
 {
 	BYTE	byCode;			// 패킷코드 0x89 고정.
@@ -70,6 +69,7 @@ struct st_NETWORK_PACKET_HEADER
 //	1	-	HP
 //
 //---------------------------------------------------------------
+#pragma pack(1)
 struct stPACKET_SC_CREATE_MY_CHARACTER
 {
 	st_NETWORK_PACKET_HEADER Header;
@@ -81,7 +81,8 @@ struct stPACKET_SC_CREATE_MY_CHARACTER
 	BYTE	HP;
 
 	BYTE Endcode;
-}
+};
+#pragma pack(4)
 
 #define	dfPACKET_SC_CREATE_OTHER_CHARACTER		1
 //---------------------------------------------------------------
@@ -98,7 +99,18 @@ struct stPACKET_SC_CREATE_MY_CHARACTER
 //	1	-	HP
 //
 //---------------------------------------------------------------
+#pragma pack(1)
+struct stPACKET_SC_CREATE_OTHER_CHARACTER
+{
+	DWORD	ID;
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
+	BYTE	HP;
 
+	BYTE Endcode;
+};
+#pragma pack(4)
 
 #define	dfPACKET_SC_DELETE_CHARACTER			2
 //---------------------------------------------------------------
@@ -109,7 +121,14 @@ struct stPACKET_SC_CREATE_MY_CHARACTER
 //	4	-	ID
 //
 //---------------------------------------------------------------
+#pragma pack(1)
+struct stPACKET_SC_DELETE_CHARACTER
+{
+	DWORD	ID;
 
+	BYTE Endcode;
+};
+#pragma pack(4)
 
 
 #define	dfPACKET_CS_MOVE_START					10
@@ -135,7 +154,16 @@ struct stPACKET_SC_CREATE_MY_CHARACTER
 #define dfPACKET_MOVE_DIR_RD					5
 #define dfPACKET_MOVE_DIR_DD					6
 #define dfPACKET_MOVE_DIR_LD					7
+#pragma pack(1)
+struct stPACKET_CS_MOVE_START
+{
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
 
+	BYTE Endcode;
+};
+#pragma pack(4)
 
 
 
@@ -155,6 +183,17 @@ struct stPACKET_SC_CREATE_MY_CHARACTER
 //	2	-	Y
 //
 //---------------------------------------------------------------
+#pragma pack(1)
+struct stPACKET_SC_MOVE_START
+{
+	DWORD	ID;
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
+
+	BYTE Endcode;
+};
+#pragma pack(4)
 
 
 
@@ -326,4 +365,3 @@ struct stPACKET_SC_CREATE_MY_CHARACTER
 
 
 #endif
-

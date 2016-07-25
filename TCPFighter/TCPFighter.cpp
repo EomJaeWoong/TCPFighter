@@ -19,8 +19,10 @@ CBaseObject *g_pPlayerObject;
 CBaseObject *gObject[MAX_OBJECT];
 CScreenDib g_cScreenDib(640, 480, 32);
 CSpriteDib *g_pSpriteDib;
-CFrameSkip g_FrameSkip(50);
+CFrameSkip g_FrameSkip(30);
+SOCKET client_sock;
 BOOL g_bActiveApp;
+int retval; 
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -29,6 +31,9 @@ void Update_Game(void);
 void KeyProcess();
 void Action();
 void Draw();
+void ConnectProc();
+void ReadProc();
+void WriteProc();
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -58,14 +63,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	RegisterClassEx(&wcex);
 
 	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
-	
-	if (!InitialNetwork())
-	{
-		MessageBox(g_hWnd, L"Network", NULL, 0);
-		return FALSE;
-	}
-
-	InitialGame();
 
 	g_hWnd = CreateWindow(L"TCPFighter", L"TCPFighter", WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 640, 480, NULL, NULL, hInstance, NULL);
@@ -77,6 +74,9 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	ShowWindow(g_hWnd, nCmdShow);
 	UpdateWindow(g_hWnd);
+
+	InitialGame();
+	InitialNetwork(&client_sock, &g_hWnd);
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// 윈도우 사이즈 맞추기
@@ -139,7 +139,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_ACTIVATEAPP :
 		g_bActiveApp = (BOOL)wParam;
 		break;
+		
+	case WM_NETWORK :
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_CONNECT :
+			ConnectProc();
+			break;
 
+		case FD_CLOSE :
+			break;
+
+		case FD_READ :
+			ReadProc();
+			break;
+
+		case FD_WRITE :
+			WriteProc();
+			break;
+		}
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: 여기에 그리기 코드를 추가합니다.
@@ -237,10 +255,6 @@ void InitialGame()
 	g_pSpriteDib->LoadDibSprite(eGUAGE_HP, L"Data\\HPGuage.bmp", 0, 0);
 
 	g_pSpriteDib->LoadDibSprite(eSHADOW, L"Data\\Shadow.bmp", 32, 4);
-
-	g_pPlayerObject = new CPlayerObject(TRUE);
-	g_pPlayerObject->SetPosition(100, 100);
-	gObject[0] = g_pPlayerObject;
 }
 
 void Update_Game(void)
@@ -312,4 +326,96 @@ void Draw()
 		if (gObject[iCnt] != NULL)
 			gObject[iCnt]->Draw(g_pSpriteDib, bypDest, iDestWidth, iDestHeight, iDestPitch);
 	}
+}
+
+void ConnectProc()
+{
+	stPACKET_SC_CREATE_MY_CHARACTER packet;
+	while (1){
+		retval = recv(client_sock, (char *)&packet, sizeof(stPACKET_SC_CREATE_MY_CHARACTER), 0);
+		if (retval == SOCKET_ERROR)
+		{
+			if (WSAGetLastError() != WSAEWOULDBLOCK)
+			{
+				//오류 처리
+			}
+		}
+
+		if (packet.Header.byCode == (BYTE)0x89 && packet.Header.byType == dfPACKET_SC_CREATE_MY_CHARACTER
+			)
+		{
+			g_pPlayerObject = new CPlayerObject(TRUE, packet.ID, eTYPE_PLAYER, packet.HP, packet.Direction);
+			g_pPlayerObject->SetPosition(packet.X, packet.Y);
+			gObject[0] = g_pPlayerObject;
+			break;
+		}
+	}
+}
+
+void ReadProc()
+{
+	st_NETWORK_PACKET_HEADER Header;
+	
+	retval = recv(client_sock, (char *)&Header, sizeof(st_NETWORK_PACKET_HEADER), 0);
+	if (retval == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSAEWOULDBLOCK)
+		{
+			//오류 처리
+		}
+	}
+
+	if (Header.byCode == (BYTE)0x89)
+	{
+			switch (Header.byType)
+			{
+			case dfPACKET_SC_CREATE_OTHER_CHARACTER :
+				stPACKET_SC_CREATE_OTHER_CHARACTER stPacketCreateCharacter;
+				retval = recv(client_sock, (char *)&stPacketCreateCharacter, sizeof(stPacketCreateCharacter), 0);
+					if (retval == SOCKET_ERROR)
+					{
+						if (WSAGetLastError() != WSAEWOULDBLOCK)
+						{
+							//오류 처리
+						}
+					}
+
+					for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+					{
+						if (gObject[iCnt] == NULL)
+						{
+							gObject[iCnt] = new CPlayerObject(FALSE, stPacketCreateCharacter.ID, 
+								eTYPE_PLAYER, stPacketCreateCharacter.HP, stPacketCreateCharacter.Direction);
+							gObject[iCnt]->SetPosition(stPacketCreateCharacter.X, stPacketCreateCharacter.Y);
+							break;
+						}
+					}
+				break;
+
+			case dfPACKET_SC_DELETE_CHARACTER :
+				stPACKET_SC_DELETE_CHARACTER stPacketDelCharacter;
+				retval = recv(client_sock, (char *)&stPacketDelCharacter, sizeof(stPacketDelCharacter), 0);
+				if (retval == SOCKET_ERROR)
+				{
+					if (WSAGetLastError() != WSAEWOULDBLOCK)
+					{
+						//오류 처리
+					}
+				}
+
+				for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+				{
+					if (gObject[iCnt] != NULL && stPacketDelCharacter.ID == gObject[iCnt]->GetObjectID())
+					{
+						delete gObject[iCnt];
+						gObject[iCnt] = NULL;
+					}
+				}
+			}
+		}
+}
+
+void WriteProc()
+{
+	
 }

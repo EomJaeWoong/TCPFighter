@@ -4,7 +4,7 @@
 class CPlayerObject : public CBaseObject
 {
 public :
-	CPlayerObject(BOOL PlayerCharacter);
+	CPlayerObject(BOOL PlayerCharacter, int iObjectID, int iObjectType, char chHP, int iDirection);
 	~CPlayerObject();
 
 	DWORD Action(DWORD dwParam);

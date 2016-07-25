@@ -26,6 +26,19 @@
 #define LEFT 12
 #define RIGHT 13
 
+//-----------------------------------------------------------------
+// 캐릭터 이동 속도
+//-----------------------------------------------------------------
+#define dfSPEED_PLAYER_X	3
+#define dfSPEED_PLAYER_Y	2
+
+//-----------------------------------------------------------------
+// 화면 이동 범위.
+//-----------------------------------------------------------------
+#define dfRANGE_MOVE_TOP	50
+#define dfRANGE_MOVE_LEFT	10
+#define dfRANGE_MOVE_RIGHT	630
+#define dfRANGE_MOVE_BOTTOM	470
 enum e_OBJECT_TYPE
 {
 	eTYPE_PLAYER,

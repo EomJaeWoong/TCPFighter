@@ -2,9 +2,9 @@
 #include "BaseObject.h"
 #include "PlayerObject.h"
 
-CPlayerObject::CPlayerObject(BOOL PlayerCharacter)
-	: m_bPlayerCharacter(PlayerCharacter), m_chHP(100), m_dwActionCur(dfACTION_STAND),
-	m_dwActionOld(dfACTION_STAND), m_iDirCur(RIGHT), m_iDirOld (RIGHT)
+CPlayerObject::CPlayerObject(BOOL PlayerCharacter, int iObjectID, int iObjectType, char chHP, int iDirection)
+	: CBaseObject(iObjectID, iObjectType), m_bPlayerCharacter(PlayerCharacter), m_chHP(chHP), m_dwActionCur(dfACTION_STAND),
+	m_dwActionOld(dfACTION_STAND), m_iDirCur(iDirection), m_iDirOld(iDirection)
 {
 	SetSprite(ePLAYER_STAND_R01, ePLAYER_STAND_R_MAX, 5);
 }
@@ -63,8 +63,14 @@ void CPlayerObject::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth, int
 {
 	pSprite->DrawSprite50(eSHADOW, GetCurX(), GetCurY(), bypDest, iDestWidth,
 		iDestHeight, iDestPitch);
-	pSprite->DrawSpriteRed(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
+	
+	if (m_bPlayerCharacter)
+		pSprite->DrawSpriteRed(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
+			iDestHeight, iDestPitch);
+	else
+		pSprite->DrawSprite(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
 		iDestHeight, iDestPitch);
+
 	pSprite->DrawSprite(eGUAGE_HP, GetCurX() - 35, GetCurY() + 9, bypDest, iDestWidth,
 		iDestHeight, iDestPitch, m_chHP);
 }
@@ -82,45 +88,50 @@ void CPlayerObject::InputActionProc()
 		break;
 
 	case dfACTION_MOVE_LL :
-		SetPosition(GetCurX() - 3, GetCurY());
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY());
 		SetActionMove(dfACTION_MOVE_LL);
 		break;
 
 	case dfACTION_MOVE_RR :
-		SetPosition(GetCurX() + 3, GetCurY());
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY());
 		SetActionMove(dfACTION_MOVE_RR);
 		break;
 
 	case dfACTION_MOVE_DD:
-		SetPosition(GetCurX(), GetCurY() + 3);
+		SetPosition(GetCurX(), GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_DD);
 		break;
 
 	case dfACTION_MOVE_UU :
-		SetPosition(GetCurX(), GetCurY() - 3);
+		SetPosition(GetCurX(), GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_UU);
 		break;
 
 	case dfACTION_MOVE_LD :
-		SetPosition(GetCurX() - 3, GetCurY() + 3);
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_LD);
 		break;
 
 	case dfACTION_MOVE_LU :
-		SetPosition(GetCurX() - 3, GetCurY() - 3);
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_LU);
 		break;
 
 	case dfACTION_MOVE_RD :
-		SetPosition(GetCurX() + 3, GetCurY() + 3);
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_RD);
 		break;
 
 	case dfACTION_MOVE_RU :
-		SetPosition(GetCurX() + 3, GetCurY() - 3);
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_RU);
 		break;
 	}
+
+	if (GetCurX() < dfRANGE_MOVE_LEFT)		SetPosition(dfRANGE_MOVE_LEFT, GetCurY());
+	if (GetCurX() > dfRANGE_MOVE_RIGHT)		SetPosition(dfRANGE_MOVE_RIGHT, GetCurY());
+	if (GetCurY() < dfRANGE_MOVE_TOP)		SetPosition(GetCurX(), dfRANGE_MOVE_TOP);
+	if (GetCurY() > dfRANGE_MOVE_BOTTOM)	SetPosition(GetCurX(), dfRANGE_MOVE_BOTTOM);
 }
 
 BOOL CPlayerObject::isPlayer()

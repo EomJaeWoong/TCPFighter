@@ -132,33 +132,33 @@ void CSpriteDib::DrawSprite(int iSpriteIndex, int iDrawX, int iDrawY, BYTE *bypD
 	//////////////////////////////////////////////////////////////////////////////
 	// 클리핑 처리
 	//////////////////////////////////////////////////////////////////////////////
-	
-	if (iDrawPosX < 0)													//왼쪽
-	{
-		iDrawPosX = abs(iDrawPosX);
-		iSpriteWidth -= iDrawPosX;
-		pSrcOrigin = (BYTE*)(pSrc + iDrawPosX);
-		pDestOrigin = (BYTE*)(pDest + iDrawPosX);
-	}
 
 	if (iDrawPosX + m_stpSprite[iSpriteIndex].iWidth > iDestWidth)		//오른쪽
 	{
 		iSpriteWidth = iDestWidth - iDrawPosX;
-	}
-	
-	if (iDrawPosY < 0)													//위	-> 제작중
-	{
-		iDrawPosY = abs(iDrawPosY);
-		iSpriteHeight -= iDrawPosY;
-		pSrcOrigin = (BYTE*)(pSrc + (iDrawPosY * iSpriteWidth));
-		pDestOrigin = (BYTE*)(pDest + (iDrawPosY * iDestWidth));
 	}
 
 	if (iDrawPosY + m_stpSprite[iSpriteIndex].iHeight > iDestHeight)	//아래
 	{
 		iSpriteHeight = iDestHeight - iDrawPosY;
 	}
-	
+
+	if (iDrawPosY < 0)													//위
+	{
+		iDrawPosY = abs(iDrawPosY);
+		iSpriteHeight -= iDrawPosY;
+		pSrcOrigin += (iDrawPosY * m_stpSprite[iSpriteIndex].iWidth) * 4;
+		pDestOrigin += (iDrawPosY * iDestWidth) * 4;
+	}
+
+	if (iDrawPosX < 0)													//왼쪽
+	{
+		iDrawPosX = abs(iDrawPosX);
+		iSpriteWidth -= iDrawPosX;
+		pSrcOrigin += iDrawPosX * 4;
+		pDestOrigin += iDrawPosX * 4;
+	}
+
 	//////////////////////////////////////////////////////////////////////////////
 	// 길이에 따른 출력 처리
 	//////////////////////////////////////////////////////////////////////////////
@@ -212,30 +212,30 @@ void CSpriteDib::DrawSprite50(int iSpriteIndex, int iDrawX, int iDrawY, BYTE *by
 	// 클리핑 처리
 	//////////////////////////////////////////////////////////////////////////////
 
-	if (iDrawPosX < 0)													//왼쪽
-	{
-		iDrawPosX = abs(iDrawPosX);
-		iSpriteWidth -= iDrawPosX;
-		pSrcOrigin = (BYTE*)(pSrc + iDrawPosX);
-		pDestOrigin = (BYTE*)(pDest + iDrawPosX);
-	}
-
 	if (iDrawPosX + m_stpSprite[iSpriteIndex].iWidth > iDestWidth)		//오른쪽
 	{
 		iSpriteWidth = iDestWidth - iDrawPosX;
 	}
 
-	if (iDrawPosY < 0)													//위	-> 제작중
-	{
-		iDrawPosY = abs(iDrawPosY);
-		iSpriteHeight -= iDrawPosY;
-		pSrcOrigin = (BYTE*)(pSrc + (iDrawPosY * iSpriteWidth));
-		pDestOrigin = (BYTE*)(pDest + (iDrawPosY * iDestWidth));
-	}
-
 	if (iDrawPosY + m_stpSprite[iSpriteIndex].iHeight > iDestHeight)	//아래
 	{
 		iSpriteHeight = iDestHeight - iDrawPosY;
+	}
+
+	if (iDrawPosY < 0)													//위
+	{
+		iDrawPosY = abs(iDrawPosY);
+		iSpriteHeight -= iDrawPosY;
+		pSrcOrigin += (iDrawPosY * m_stpSprite[iSpriteIndex].iWidth) * 4;
+		pDestOrigin += (iDrawPosY * iDestWidth) * 4;
+	}
+
+	if (iDrawPosX < 0)													//왼쪽
+	{
+		iDrawPosX = abs(iDrawPosX);
+		iSpriteWidth -= iDrawPosX;
+		pSrcOrigin += iDrawPosX * 4;
+		pDestOrigin += iDrawPosX * 4;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -292,30 +292,30 @@ void CSpriteDib::DrawSpriteRed(int iSpriteIndex, int iDrawX, int iDrawY, BYTE *b
 	// 클리핑 처리
 	//////////////////////////////////////////////////////////////////////////////
 
-	if (iDrawPosX < 0)													//왼쪽
-	{
-		iDrawPosX = abs(iDrawPosX);
-		iSpriteWidth -= iDrawPosX;
-		pSrcOrigin = (BYTE*)(pSrc + iDrawPosX);
-		pDestOrigin = (BYTE*)(pDest + iDrawPosX);
-	}
-
 	if (iDrawPosX + m_stpSprite[iSpriteIndex].iWidth > iDestWidth)		//오른쪽
 	{
 		iSpriteWidth = iDestWidth - iDrawPosX;
 	}
 
-	if (iDrawPosY < 0)													//위	-> 제작중
-	{
-		iDrawPosY = abs(iDrawPosY);
-		iSpriteHeight -= iDrawPosY;
-		pSrcOrigin = (BYTE*)(pSrc + (iDrawPosY * iSpriteWidth));
-		pDestOrigin = (BYTE*)(pDest + (iDrawPosY * iDestWidth));
-	}
-
 	if (iDrawPosY + m_stpSprite[iSpriteIndex].iHeight > iDestHeight)	//아래
 	{
 		iSpriteHeight = iDestHeight - iDrawPosY;
+	}
+
+	if (iDrawPosY < 0)													//위
+	{
+		iDrawPosY = abs(iDrawPosY);
+		iSpriteHeight -= iDrawPosY;
+		pSrcOrigin += (iDrawPosY * m_stpSprite[iSpriteIndex].iWidth) * 4;
+		pDestOrigin += (iDrawPosY * iDestWidth) * 4;
+	}
+
+	if (iDrawPosX < 0)													//왼쪽
+	{
+		iDrawPosX = abs(iDrawPosX);
+		iSpriteWidth -= iDrawPosX;
+		pSrcOrigin += iDrawPosX * 4;
+		pDestOrigin += iDrawPosX * 4;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
