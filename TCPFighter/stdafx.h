@@ -27,3 +27,4 @@
 #include "SpriteDib.h"
 #include "Network.h"
 #include "PacketDefine.h"
+#include "StreamQueue.h"

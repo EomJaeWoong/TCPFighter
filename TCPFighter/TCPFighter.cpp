@@ -22,6 +22,8 @@ CSpriteDib *g_pSpriteDib;
 CFrameSkip g_FrameSkip(30);
 SOCKET client_sock;
 BOOL g_bActiveApp;
+CAyaStreamSQ SendQ;
+CAyaStreamSQ RecvQ;
 int retval; 
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
@@ -411,6 +413,7 @@ void ReadProc()
 						gObject[iCnt] = NULL;
 					}
 				}
+				break;
 			}
 		}
 }

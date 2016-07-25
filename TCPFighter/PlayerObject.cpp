@@ -195,7 +195,8 @@ void CPlayerObject::SetActionMove(DWORD actionMove)
 	if (GetCurX() > GetOldX())			SetDirection(RIGHT);
 	else if (GetCurX() < GetOldX())		SetDirection(LEFT);
 
-	if (m_dwActionOld == dfACTION_STAND || GetDirection() != m_iDirOld){
+	if (m_dwActionOld == dfACTION_STAND || GetDirection() != m_iDirOld)
+	{
 		if (m_iDirCur == RIGHT)			SetSprite(ePLAYER_MOVE_R01, ePLAYER_MOVE_R_MAX, 4);
 		else if (m_iDirCur == LEFT) 	SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
 	}

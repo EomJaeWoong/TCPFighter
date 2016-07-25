@@ -82,7 +82,6 @@ struct stPACKET_SC_CREATE_MY_CHARACTER
 
 	BYTE Endcode;
 };
-#pragma pack(4)
 
 #define	dfPACKET_SC_CREATE_OTHER_CHARACTER		1
 //---------------------------------------------------------------
@@ -99,7 +98,6 @@ struct stPACKET_SC_CREATE_MY_CHARACTER
 //	1	-	HP
 //
 //---------------------------------------------------------------
-#pragma pack(1)
 struct stPACKET_SC_CREATE_OTHER_CHARACTER
 {
 	DWORD	ID;
@@ -110,7 +108,7 @@ struct stPACKET_SC_CREATE_OTHER_CHARACTER
 
 	BYTE Endcode;
 };
-#pragma pack(4)
+
 
 #define	dfPACKET_SC_DELETE_CHARACTER			2
 //---------------------------------------------------------------
@@ -333,7 +331,7 @@ struct stPACKET_SC_MOVE_START
 //---------------------------------------------------------------
 
 
-
+#pragma pack(4)
 // 안쓰는거
 #define	dfPACKET_CS_SYNC						250
 //---------------------------------------------------------------
