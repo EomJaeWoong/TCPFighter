@@ -202,6 +202,14 @@ struct stPACKET_SC_MOVE_START
 //	2	-	Y
 //
 //---------------------------------------------------------------
+struct stPACKET_CS_MOVE_STOP
+{
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
+
+	BYTE Endcode;
+};
 
 
 #define	dfPACKET_SC_MOVE_STOP					13
@@ -217,7 +225,15 @@ struct stPACKET_SC_MOVE_START
 //	2	-	Y
 //
 //---------------------------------------------------------------
+struct stPACKET_SC_MOVE_STOP
+{
+	DWORD	ID;
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
 
+	BYTE Endcode;
+};
 
 
 #define	dfPACKET_CS_ATTACK1						20
@@ -234,6 +250,14 @@ struct stPACKET_SC_MOVE_START
 //	2	-	Y	
 //
 //---------------------------------------------------------------
+struct stPACKET_CS_ATTACK1
+{
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
+
+	BYTE Endcode;
+};
 
 #define	dfPACKET_SC_ATTACK1						21
 //---------------------------------------------------------------
@@ -248,7 +272,15 @@ struct stPACKET_SC_MOVE_START
 //	2	-	Y
 //
 //---------------------------------------------------------------
+struct stPACKET_SC_ATTACK1
+{
+	DWORD	ID;
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
 
+	BYTE Endcode;
+};
 
 
 #define	dfPACKET_CS_ATTACK2						22
@@ -265,6 +297,14 @@ struct stPACKET_SC_MOVE_START
 //	2	-	Y
 //
 //---------------------------------------------------------------
+struct stPACKET_CS_ATTACK2
+{
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
+
+	BYTE Endcode;
+};
 
 #define	dfPACKET_SC_ATTACK2						23
 //---------------------------------------------------------------
@@ -279,6 +319,16 @@ struct stPACKET_SC_MOVE_START
 //	2	-	Y
 //
 //---------------------------------------------------------------
+struct stPACKET_SC_ATTACK2
+{
+	DWORD	ID;
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
+
+	BYTE Endcode;
+};
+
 
 #define	dfPACKET_CS_ATTACK3						24
 //---------------------------------------------------------------
@@ -294,6 +344,16 @@ struct stPACKET_SC_MOVE_START
 //	2	-	Y
 //
 //---------------------------------------------------------------
+struct stPACKET_CS_ATTACK3
+{
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
+
+	BYTE Endcode;
+};
+
+
 
 #define	dfPACKET_SC_ATTACK3						25
 //---------------------------------------------------------------
@@ -308,7 +368,15 @@ struct stPACKET_SC_MOVE_START
 //	2	-	Y
 //
 //---------------------------------------------------------------
+struct stPACKET_SC_ATTACK3
+{
+	DWORD	ID;
+	BYTE	Direction;
+	WORD	X;
+	WORD	Y;
 
+	BYTE Endcode;
+};
 
 
 
@@ -324,7 +392,14 @@ struct stPACKET_SC_MOVE_START
 //	1	-	DamageHP	( 피해자 HP )
 //
 //---------------------------------------------------------------
+struct stPACKET_SC_DAMAGE
+{
+	DWORD	AttackID;
+	DWORD	DamageID;
+	BYTE	DamageHP;
 
+	BYTE Endcode;
+};
 
 #pragma pack(4)
 // 안쓰는거

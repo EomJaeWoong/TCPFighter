@@ -19,7 +19,7 @@ CBaseObject *g_pPlayerObject;
 CBaseObject *gObject[MAX_OBJECT];
 CScreenDib g_cScreenDib(640, 480, 32);
 CSpriteDib *g_pSpriteDib;
-CFrameSkip g_FrameSkip(30);
+CFrameSkip g_FrameSkip(50);
 SOCKET client_sock;
 BOOL g_bActiveApp;
 CAyaStreamSQ SendQ;
@@ -77,6 +77,9 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	ShowWindow(g_hWnd, nCmdShow);
 	UpdateWindow(g_hWnd);
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// 게임, 네트워크 초기화
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	InitialGame();
 	InitialNetwork(&client_sock, &g_hWnd);
 
@@ -142,6 +145,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		g_bActiveApp = (BOOL)wParam;
 		break;
 		
+	//네트워크 메시지
 	case WM_NETWORK :
 		if (WSAGETASYNCERROR(lParam))
 			MessageBox(g_hWnd, L"WM_NETWORK", NULL, NULL);
@@ -153,6 +157,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case FD_CLOSE :
+			MessageBox(g_hWnd, L"close", NULL, NULL);
 			break;
 
 		case FD_READ :
@@ -163,6 +168,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			WriteProc();
 			break;
 		}
+		break;
+
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: 여기에 그리기 코드를 추가합니다.
@@ -177,6 +184,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 게임 초기화
+// 스프라이트 생성과 로드 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void InitialGame()
 {
 	g_pSpriteDib = new CSpriteDib(eSPRITE_MAX, 0x00ffffff);
@@ -262,6 +273,9 @@ void InitialGame()
 	g_pSpriteDib->LoadDibSprite(eSHADOW, L"Data\\Shadow.bmp", 32, 4);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 게임 루프
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Update_Game(void)
 {
 	if (g_bActiveApp)
@@ -277,6 +291,9 @@ void Update_Game(void)
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 키 처리
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void KeyProcess()
 {
 	DWORD dwAction = dfACTION_STAND;
@@ -307,6 +324,9 @@ void KeyProcess()
 	g_pPlayerObject->ActionInput(dwAction);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Action
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Action()
 {
 	for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
@@ -319,6 +339,9 @@ void Action()
 	//이펙트는 제일 뒤로 밀기
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Draw
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Draw()
 {
 	BYTE *bypDest = g_cScreenDib.GetDibBuffer();
@@ -335,6 +358,9 @@ void Draw()
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 서버 접속 완료후 실행
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ConnectProc()
 {
 	stPACKET_SC_CREATE_MY_CHARACTER packet;
@@ -359,108 +385,188 @@ void ConnectProc()
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Packet 읽기
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ReadProc()
 {
 	st_NETWORK_PACKET_HEADER Header;
-	
-	retval = recv(client_sock, (char *)&Header, sizeof(st_NETWORK_PACKET_HEADER), 0);
+	retval = recv(client_sock, RecvQ.GetWriteBufferPtr(), RecvQ.GetNotBrokenPutSize(), 0);
+
+	if (retval == 0)
+		return;
+
 	if (retval == SOCKET_ERROR)
 	{
-		if (WSAGetLastError() != WSAEWOULDBLOCK)
+		if (WSAGetLastError() == WSAEWOULDBLOCK)
+			return;
+		else
+			MessageBox(g_hWnd, L"ReadProc", NULL, NULL);
+	}
+	RecvQ.MoveWritePos(retval);
+
+	while (1)
+	{
+		if (RecvQ.GetUseSize() < sizeof(Header))
+			return;
+
+		RecvQ.Peek((char *)&Header, sizeof(Header));
+
+		if (Header.byCode != (BYTE)0x89)
+			return;
+
+		if (RecvQ.GetUseSize() < Header.bySize + sizeof(Header))
+			return;
+
+		RecvQ.RemoveData(sizeof(Header));
+
+		switch (Header.byType)
 		{
-			//오류 처리
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// 다른 유저 생성
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		case dfPACKET_SC_CREATE_OTHER_CHARACTER :
+			stPACKET_SC_CREATE_OTHER_CHARACTER stPacketCreateCharacter;
+			RecvQ.Get((char *)&stPacketCreateCharacter, sizeof(stPacketCreateCharacter));
+
+			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+			{
+				if (gObject[iCnt] == NULL)
+				{
+					gObject[iCnt] = new CPlayerObject(FALSE, stPacketCreateCharacter.ID,
+						eTYPE_PLAYER, stPacketCreateCharacter.HP, stPacketCreateCharacter.Direction);
+					gObject[iCnt]->SetPosition(stPacketCreateCharacter.X, stPacketCreateCharacter.Y);
+					break;
+				}
+			}
+			break;
+
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// 캐릭터 제거
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		case dfPACKET_SC_DELETE_CHARACTER :
+			stPACKET_SC_DELETE_CHARACTER stPacketDelCharacter;
+			RecvQ.Get((char *)&stPacketDelCharacter, sizeof(stPacketDelCharacter));
+
+			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+			{
+				if (gObject[iCnt] != NULL && stPacketDelCharacter.ID == gObject[iCnt]->GetObjectID())
+				{
+					delete gObject[iCnt];
+					gObject[iCnt] = NULL;
+					break;
+				}
+			}
+			break;
+
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// 움직임 시작
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		case dfPACKET_SC_MOVE_START :
+			stPACKET_SC_MOVE_START stPacketMoveStart;
+			RecvQ.Get((char *)&stPacketMoveStart, sizeof(stPacketMoveStart));
+
+			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+			{
+				if (gObject[iCnt] != NULL && stPacketMoveStart.ID == gObject[iCnt]->GetObjectID())
+				{
+					gObject[iCnt]->ActionInput(stPacketMoveStart.Direction);
+					break;
+				}
+			}
+			break;
+
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// 움직임 멈춤
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		case dfPACKET_SC_MOVE_STOP :
+			stPACKET_SC_MOVE_STOP stPacketMoveStop;
+			RecvQ.Get((char *)&stPacketMoveStop, sizeof(stPacketMoveStop));
+
+			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+			{
+				if (gObject[iCnt] != NULL && stPacketMoveStop.ID == gObject[iCnt]->GetObjectID() &&
+					g_pPlayerObject->GetObjectID() != stPacketMoveStop.ID)
+				{
+					gObject[iCnt]->ActionInput(dfACTION_STAND);
+					gObject[iCnt]->SetPosition(stPacketMoveStop.X, stPacketMoveStop.Y);
+					break;
+				}
+			}
+			break;
+
+		case dfPACKET_SC_ATTACK1 :
+			stPACKET_SC_ATTACK1 stPacketAttack1;
+			RecvQ.Get((char *)&stPacketAttack1, sizeof(stPacketAttack1));
+
+			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+			{
+				if (gObject[iCnt] != NULL && stPacketAttack1.ID == gObject[iCnt]->GetObjectID() &&
+					g_pPlayerObject->GetObjectID() != stPacketMoveStop.ID)
+				{
+					gObject[iCnt]->SetPosition(stPacketAttack1.X, stPacketAttack1.Y);
+					gObject[iCnt]->ActionInput(dfACTION_ATTACK1);
+					break;
+				}
+			}
+			break;
+
+		case dfPACKET_SC_ATTACK2 :
+			stPACKET_SC_ATTACK2 stPacketAttack2;
+			RecvQ.Get((char *)&stPacketAttack2, sizeof(stPacketAttack2));
+
+			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+			{
+				if (gObject[iCnt] != NULL && stPacketAttack2.ID == gObject[iCnt]->GetObjectID() &&
+					g_pPlayerObject->GetObjectID() != stPacketMoveStop.ID)
+				{
+					gObject[iCnt]->ActionInput(dfACTION_ATTACK2);
+					gObject[iCnt]->SetPosition(stPacketAttack2.X, stPacketAttack2.Y);
+					break;
+				}
+			}
+			break;
+
+		case dfPACKET_SC_ATTACK3 :
+			stPACKET_SC_ATTACK1 stPacketAttack3;
+			RecvQ.Get((char *)&stPacketAttack3, sizeof(stPacketAttack3));
+
+			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+			{
+				if (gObject[iCnt] != NULL && stPacketAttack3.ID == gObject[iCnt]->GetObjectID() &&
+					g_pPlayerObject->GetObjectID() != stPacketAttack3.ID)
+				{
+					gObject[iCnt]->ActionInput(dfACTION_ATTACK3);
+					gObject[iCnt]->SetPosition(stPacketAttack3.X, stPacketAttack3.Y);
+					break;
+				}
+			}
+			break;
 		}
 	}
-
-	if (Header.byCode == (BYTE)0x89)
-	{
-			switch (Header.byType)
-			{
-			case dfPACKET_SC_CREATE_OTHER_CHARACTER :
-				stPACKET_SC_CREATE_OTHER_CHARACTER stPacketCreateCharacter;
-				retval = recv(client_sock, (char *)&stPacketCreateCharacter, sizeof(stPacketCreateCharacter), 0);
-					if (retval == SOCKET_ERROR)
-					{
-						if (WSAGetLastError() != WSAEWOULDBLOCK)
-						{
-							//오류 처리
-						}
-					}
-
-					for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-					{
-						if (gObject[iCnt] == NULL)
-						{
-							gObject[iCnt] = new CPlayerObject(FALSE, stPacketCreateCharacter.ID, 
-								eTYPE_PLAYER, stPacketCreateCharacter.HP, stPacketCreateCharacter.Direction);
-							gObject[iCnt]->SetPosition(stPacketCreateCharacter.X, stPacketCreateCharacter.Y);
-							break;
-						}
-					}
-				break;
-
-			case dfPACKET_SC_DELETE_CHARACTER :
-				stPACKET_SC_DELETE_CHARACTER stPacketDelCharacter;
-				retval = recv(client_sock, (char *)&stPacketDelCharacter, sizeof(stPacketDelCharacter), 0);
-				if (retval == SOCKET_ERROR)
-				{
-					if (WSAGetLastError() != WSAEWOULDBLOCK)
-					{
-						//오류 처리
-					}
-				}
-
-				for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-				{
-					if (gObject[iCnt] != NULL && stPacketDelCharacter.ID == gObject[iCnt]->GetObjectID())
-					{
-						delete gObject[iCnt];
-						gObject[iCnt] = NULL;
-					}
-				}
-				break;
-
-			case dfPACKET_SC_MOVE_START:
-				stPACKET_SC_MOVE_START stPacketMoveCharacter;
-				retval = recv(client_sock, (char *)&stPacketMoveCharacter, sizeof(stPacketMoveCharacter), 0);
-				if (retval == SOCKET_ERROR)
-				{
-					if (WSAGetLastError() != WSAEWOULDBLOCK)
-					{
-						//오류 처리
-					}
-				}
-				/*
-				for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-				{
-					if (gObject[iCnt] != NULL && stPacketDelCharacter.ID == gObject[iCnt]->GetObjectID())
-					{
-						
-					}
-				}
-				*/
-				break;
-			}
-		}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Packet 보내기
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WriteProc()
 {
 	int retval;
-
-	if (SendQ.GetUseSize() <= 0)
+	while (1){
+		if (SendQ.GetUseSize() <= 0)
 			return;
 
-	retval = send(client_sock, SendQ.GetReadBufferPtr(), SendQ.GetNotBrokenGetSize(), 0);
+		retval = send(client_sock, SendQ.GetReadBufferPtr(), SendQ.GetNotBrokenGetSize(), 0);
 
-	if (retval == SOCKET_ERROR)
-	{
-		if (WSAGetLastError() != WSAEWOULDBLOCK)
+		if (retval == SOCKET_ERROR)
 		{
-			return;
-		}//에러처리
+			if (WSAGetLastError() != WSAEWOULDBLOCK)
+			{
+				return;
+			}//에러처리
+		}
+
+		if (retval > 0)
+			SendQ.RemoveData(retval);
 	}
-	
-	if (retval > 0)
-		SendQ.RemoveData(retval);
 }

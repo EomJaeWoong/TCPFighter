@@ -43,8 +43,76 @@ int MakePacket_MoveStart(st_NETWORK_PACKET_HEADER *pHeader, char *pPacket,
 	stPacket->Endcode = dfNETWORK_PACKET_END;
 
 	pHeader->byCode = dfNETWORK_PACKET_CODE;
-	pHeader->bySize = sizeof(*stPacket);
+	pHeader->bySize = sizeof(*stPacket) - 1;
 	pHeader->byType = dfPACKET_CS_MOVE_START;
+
+	return sizeof(*pHeader) + sizeof(*stPacket);
+}
+
+int MakePacket_MoveStop(st_NETWORK_PACKET_HEADER *pHeader, char *pPacket,
+	int iDir, int iX, int iY)
+{
+	stPACKET_CS_MOVE_STOP *stPacket = (stPACKET_CS_MOVE_STOP*)pPacket;
+
+	stPacket->Direction = (BYTE)iDir;
+	stPacket->X = (WORD)iX;
+	stPacket->Y = (WORD)iY;
+	stPacket->Endcode = dfNETWORK_PACKET_END;
+
+	pHeader->byCode = dfNETWORK_PACKET_CODE;
+	pHeader->bySize = sizeof(*stPacket) - 1;
+	pHeader->byType = dfPACKET_CS_MOVE_STOP;
+
+	return sizeof(*pHeader) + sizeof(*stPacket);
+}
+
+int MakePacket_Attack1(st_NETWORK_PACKET_HEADER *pHeader, char *pPacket,
+	int iDir, int iX, int iY)
+{
+	stPACKET_CS_ATTACK1 *stPacket = (stPACKET_CS_ATTACK1*)pPacket;
+
+	stPacket->Direction = (BYTE)iDir;
+	stPacket->X = (WORD)iX;
+	stPacket->Y = (WORD)iY;
+	stPacket->Endcode = dfNETWORK_PACKET_END;
+
+	pHeader->byCode = dfNETWORK_PACKET_CODE;
+	pHeader->bySize = sizeof(*stPacket) - 1;
+	pHeader->byType = dfPACKET_CS_ATTACK1;
+
+	return sizeof(*pHeader) + sizeof(*stPacket);
+}
+
+int MakePacket_Attack2(st_NETWORK_PACKET_HEADER *pHeader, char *pPacket,
+	int iDir, int iX, int iY)
+{
+	stPACKET_CS_ATTACK1 *stPacket = (stPACKET_CS_ATTACK1*)pPacket;
+
+	stPacket->Direction = (BYTE)iDir;
+	stPacket->X = (WORD)iX;
+	stPacket->Y = (WORD)iY;
+	stPacket->Endcode = dfNETWORK_PACKET_END;
+
+	pHeader->byCode = dfNETWORK_PACKET_CODE;
+	pHeader->bySize = sizeof(*stPacket) - 1;
+	pHeader->byType = dfPACKET_CS_ATTACK2;
+
+	return sizeof(*pHeader) + sizeof(*stPacket);
+}
+
+int MakePacket_Attack3(st_NETWORK_PACKET_HEADER *pHeader, char *pPacket,
+	int iDir, int iX, int iY)
+{
+	stPACKET_CS_ATTACK1 *stPacket = (stPACKET_CS_ATTACK1*)pPacket;
+
+	stPacket->Direction = (BYTE)iDir;
+	stPacket->X = (WORD)iX;
+	stPacket->Y = (WORD)iY;
+	stPacket->Endcode = dfNETWORK_PACKET_END;
+
+	pHeader->byCode = dfNETWORK_PACKET_CODE;
+	pHeader->bySize = sizeof(*stPacket) - 1;
+	pHeader->byType = dfPACKET_CS_ATTACK3;
 
 	return sizeof(*pHeader) + sizeof(*stPacket);
 }

@@ -2,7 +2,7 @@
 #include "FrameSkip.h"
 
 CFrameSkip::CFrameSkip(int iMaxFPS)
-	:m_iMaxFPS(iMaxFPS * 100)
+	:m_iMaxFPS(1000 / iMaxFPS)
 {
 	m_dwSystemTick = 0;
 	m_iTick = 0;
@@ -26,11 +26,11 @@ BOOL CFrameSkip::FrameSkip()
 		return FALSE;
 	}
 
-	if (m_iOneFrameTick < m_iMaxFPS)	Sleep((m_iMaxFPS - m_iOneFrameTick)/100);
+	if (m_iOneFrameTick < m_iMaxFPS)	Sleep((m_iMaxFPS - m_iOneFrameTick));
 	else
 	{
 		m_iTick = m_iOneFrameTick;
-		Sleep(m_iMaxFPS/100);
+		Sleep(m_iMaxFPS);
 	}
 
 	m_dwSystemTick = GetTickCount();

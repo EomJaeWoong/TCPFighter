@@ -23,8 +23,8 @@
 #define dfDELAY_ATTACK3	4
 #define dfDELAY_EFFECT	3
 
-#define LEFT 12
-#define RIGHT 13
+#define LEFT 0
+#define RIGHT 4
 
 //-----------------------------------------------------------------
 // 캐릭터 이동 속도

@@ -88,50 +88,53 @@ void CPlayerObject::InputActionProc()
 		break;
 
 	case dfACTION_MOVE_LL :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY());
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X < dfRANGE_MOVE_LEFT ? dfRANGE_MOVE_LEFT : GetCurX() - dfSPEED_PLAYER_X
+			, GetCurY());
 		SetActionMove(dfACTION_MOVE_LL);
 		break;
 
 	case dfACTION_MOVE_RR :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY());
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X > dfRANGE_MOVE_RIGHT ? dfRANGE_MOVE_RIGHT : GetCurX() + dfSPEED_PLAYER_X
+			, GetCurY());
 		SetActionMove(dfACTION_MOVE_RR);
 		break;
 
 	case dfACTION_MOVE_DD:
-		SetPosition(GetCurX(), GetCurY() + dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX(),
+			GetCurY() + dfSPEED_PLAYER_Y > dfRANGE_MOVE_BOTTOM ? dfRANGE_MOVE_BOTTOM : GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_DD);
 		break;
 
 	case dfACTION_MOVE_UU :
-		SetPosition(GetCurX(), GetCurY() - dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX(), 
+			GetCurY() - dfSPEED_PLAYER_Y < dfRANGE_MOVE_TOP ? dfRANGE_MOVE_TOP : GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_UU);
 		break;
 
 	case dfACTION_MOVE_LD :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X < dfRANGE_MOVE_LEFT ? dfRANGE_MOVE_LEFT : GetCurX() - dfSPEED_PLAYER_X
+			, GetCurY() + dfSPEED_PLAYER_Y > dfRANGE_MOVE_BOTTOM ? dfRANGE_MOVE_BOTTOM : GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_LD);
 		break;
 
 	case dfACTION_MOVE_LU :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X < dfRANGE_MOVE_LEFT ? dfRANGE_MOVE_LEFT : GetCurX() - dfSPEED_PLAYER_X
+			, GetCurY() - dfSPEED_PLAYER_Y < dfRANGE_MOVE_TOP ? dfRANGE_MOVE_TOP : GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_LU);
 		break;
 
 	case dfACTION_MOVE_RD :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X > dfRANGE_MOVE_RIGHT ? dfRANGE_MOVE_RIGHT : GetCurX() + dfSPEED_PLAYER_X
+			, GetCurY() + dfSPEED_PLAYER_Y > dfRANGE_MOVE_BOTTOM ? dfRANGE_MOVE_BOTTOM : GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_RD);
 		break;
 
 	case dfACTION_MOVE_RU :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X > dfRANGE_MOVE_RIGHT ? dfRANGE_MOVE_RIGHT : GetCurX() + dfSPEED_PLAYER_X
+			, GetCurY() - dfSPEED_PLAYER_Y < dfRANGE_MOVE_TOP ? dfRANGE_MOVE_TOP : GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_RU);
 		break;
 	}
-
-	if (GetCurX() < dfRANGE_MOVE_LEFT)		SetPosition(dfRANGE_MOVE_LEFT, GetCurY());
-	if (GetCurX() > dfRANGE_MOVE_RIGHT)		SetPosition(dfRANGE_MOVE_RIGHT, GetCurY());
-	if (GetCurY() < dfRANGE_MOVE_TOP)		SetPosition(GetCurX(), dfRANGE_MOVE_TOP);
-	if (GetCurY() > dfRANGE_MOVE_BOTTOM)	SetPosition(GetCurX(), dfRANGE_MOVE_BOTTOM);
 }
 
 BOOL CPlayerObject::isPlayer()
@@ -147,6 +150,9 @@ int CPlayerObject::GetDirection()
 
 void CPlayerObject::SetActionAttack1()	
 { 
+	st_NETWORK_PACKET_HEADER Header;
+	char Packet[100];
+
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK1;
 
@@ -156,10 +162,20 @@ void CPlayerObject::SetActionAttack1()
 		else if (GetDirection() == RIGHT)
 			SetSprite(ePLAYER_ATTACK1_R01, ePLAYER_ATTACK1_R_MAX, 3);
 	}
+
+	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur != dfACTION_STAND)
+	{
+		int len = MakePacket_Attack1(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
+		SendQ.Put((char *)&Header, sizeof(Header));
+		SendQ.Put(Packet, len - sizeof(Header));
+	}
 }
 
 void CPlayerObject::SetActionAttack2()	
 {
+	st_NETWORK_PACKET_HEADER Header;
+	char Packet[100];
+
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK2;
 
@@ -169,10 +185,20 @@ void CPlayerObject::SetActionAttack2()
 		else if (GetDirection() == RIGHT)
 			SetSprite(ePLAYER_ATTACK2_R01, ePLAYER_ATTACK2_R_MAX, 4);
 	}
+
+	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur != dfACTION_STAND)
+	{
+		int len = MakePacket_Attack2(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
+		SendQ.Put((char *)&Header, sizeof(Header));
+		SendQ.Put(Packet, len - sizeof(Header));
+	}
 }
 
 void CPlayerObject::SetActionAttack3()	
 {
+	st_NETWORK_PACKET_HEADER Header;
+	char Packet[100];
+
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK3;
 	if (m_dwActionOld != m_dwActionCur){
@@ -182,6 +208,12 @@ void CPlayerObject::SetActionAttack3()
 			SetSprite(ePLAYER_ATTACK3_R01, ePLAYER_ATTACK3_R_MAX, 4);
 	}
 
+	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur != dfACTION_STAND)
+	{
+		int len = MakePacket_Attack3(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
+		SendQ.Put((char *)&Header, sizeof(Header));
+		SendQ.Put(Packet, len - sizeof(Header));
+	}
 }
 
 /*---------------------------------------------------------------------------------------------*/
@@ -204,11 +236,11 @@ void CPlayerObject::SetActionMove(DWORD actionMove)
 		else if (m_iDirCur == LEFT) 	SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
 	}
 
-	if (m_dwActionCur != m_dwActionOld)
+	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur != dfACTION_STAND)
 	{
-		MakePacket_MoveStart(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
+		int len = MakePacket_MoveStart(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
 		SendQ.Put((char *)&Header, sizeof(Header));
-		SendQ.Put(Packet, Header.bySize);
+		SendQ.Put(Packet, len - sizeof(Header));
 	}
 }
 
@@ -217,12 +249,23 @@ void CPlayerObject::SetActionMove(DWORD actionMove)
 /*---------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetActionStand()	
 {
+	st_NETWORK_PACKET_HEADER Header;
+	char Packet[100];
+
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_STAND;
 
 	if (m_dwActionOld != dfACTION_STAND){
 		if (m_iDirCur == LEFT)			SetSprite(ePLAYER_STAND_L01, ePLAYER_STAND_L_MAX, 5);
 		else if (m_iDirCur == RIGHT)	SetSprite(ePLAYER_STAND_R01, ePLAYER_STAND_R_MAX, 5);
+	}
+
+	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur == dfACTION_STAND &&
+		m_dwActionOld != dfACTION_ATTACK1 && m_dwActionOld != dfACTION_ATTACK2 && m_dwActionOld != dfACTION_ATTACK3)
+	{
+		int len = MakePacket_MoveStop(&Header, Packet, m_iDirCur, GetCurX(), GetCurY());
+		SendQ.Put((char *)&Header, sizeof(Header));
+		SendQ.Put(Packet, len - sizeof(Header));
 	}
 }
 
