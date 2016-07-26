@@ -25,6 +25,9 @@
 #include "eSprite.h"
 #include "ObjectType.h"
 #include "SpriteDib.h"
-#include "Network.h"
 #include "PacketDefine.h"
 #include "StreamQueue.h"
+#include "Network.h"
+
+extern CAyaStreamSQ SendQ;
+extern CAyaStreamSQ RecvQ;

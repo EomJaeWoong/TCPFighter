@@ -119,14 +119,12 @@ struct stPACKET_SC_CREATE_OTHER_CHARACTER
 //	4	-	ID
 //
 //---------------------------------------------------------------
-#pragma pack(1)
 struct stPACKET_SC_DELETE_CHARACTER
 {
 	DWORD	ID;
 
 	BYTE Endcode;
 };
-#pragma pack(4)
 
 
 #define	dfPACKET_CS_MOVE_START					10
@@ -152,7 +150,6 @@ struct stPACKET_SC_DELETE_CHARACTER
 #define dfPACKET_MOVE_DIR_RD					5
 #define dfPACKET_MOVE_DIR_DD					6
 #define dfPACKET_MOVE_DIR_LD					7
-#pragma pack(1)
 struct stPACKET_CS_MOVE_START
 {
 	BYTE	Direction;
@@ -161,7 +158,6 @@ struct stPACKET_CS_MOVE_START
 
 	BYTE Endcode;
 };
-#pragma pack(4)
 
 
 
@@ -181,7 +177,6 @@ struct stPACKET_CS_MOVE_START
 //	2	-	Y
 //
 //---------------------------------------------------------------
-#pragma pack(1)
 struct stPACKET_SC_MOVE_START
 {
 	DWORD	ID;
@@ -191,7 +186,7 @@ struct stPACKET_SC_MOVE_START
 
 	BYTE Endcode;
 };
-#pragma pack(4)
+
 
 
 

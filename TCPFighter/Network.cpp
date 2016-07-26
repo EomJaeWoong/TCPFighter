@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "Network.h"
 
 BOOL InitialNetwork(SOCKET *sock, HWND *hWnd)
 {
@@ -31,4 +30,21 @@ BOOL InitialNetwork(SOCKET *sock, HWND *hWnd)
 	}
 
 	return TRUE;
+}
+
+int MakePacket_MoveStart(st_NETWORK_PACKET_HEADER *pHeader, char *pPacket,
+	int iDir, int iX, int iY)
+{
+	stPACKET_CS_MOVE_START *stPacket = (stPACKET_CS_MOVE_START*)pPacket;
+
+	stPacket->Direction = (BYTE)iDir;
+	stPacket->X = (WORD)iX;
+	stPacket->Y = (WORD)iY;
+	stPacket->Endcode = dfNETWORK_PACKET_END;
+
+	pHeader->byCode = dfNETWORK_PACKET_CODE;
+	pHeader->bySize = sizeof(*stPacket);
+	pHeader->byType = dfPACKET_CS_MOVE_START;
+
+	return sizeof(*pHeader) + sizeof(*stPacket);
 }

@@ -143,6 +143,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case WM_NETWORK :
+		if (WSAGETASYNCERROR(lParam))
+			MessageBox(g_hWnd, L"WM_NETWORK", NULL, NULL);
+
 		switch (WSAGETSELECTEVENT(lParam))
 		{
 		case FD_CONNECT :
@@ -265,6 +268,8 @@ void Update_Game(void)
 		KeyProcess();
 
 	Action();
+	WriteProc();
+
 	if (g_FrameSkip.FrameSkip())
 	{
 		Draw();
@@ -339,7 +344,7 @@ void ConnectProc()
 		{
 			if (WSAGetLastError() != WSAEWOULDBLOCK)
 			{
-				//坷幅 贸府
+				return;
 			}
 		}
 
@@ -414,11 +419,48 @@ void ReadProc()
 					}
 				}
 				break;
+
+			case dfPACKET_SC_MOVE_START:
+				stPACKET_SC_MOVE_START stPacketMoveCharacter;
+				retval = recv(client_sock, (char *)&stPacketMoveCharacter, sizeof(stPacketMoveCharacter), 0);
+				if (retval == SOCKET_ERROR)
+				{
+					if (WSAGetLastError() != WSAEWOULDBLOCK)
+					{
+						//坷幅 贸府
+					}
+				}
+				/*
+				for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+				{
+					if (gObject[iCnt] != NULL && stPacketDelCharacter.ID == gObject[iCnt]->GetObjectID())
+					{
+						
+					}
+				}
+				*/
+				break;
 			}
 		}
 }
 
 void WriteProc()
 {
+	int retval;
+
+	if (SendQ.GetUseSize() <= 0)
+			return;
+
+	retval = send(client_sock, SendQ.GetReadBufferPtr(), SendQ.GetNotBrokenGetSize(), 0);
+
+	if (retval == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSAEWOULDBLOCK)
+		{
+			return;
+		}//俊矾贸府
+	}
 	
+	if (retval > 0)
+		SendQ.RemoveData(retval);
 }

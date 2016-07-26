@@ -189,6 +189,9 @@ void CPlayerObject::SetActionAttack3()
 /*---------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetActionMove(DWORD actionMove)		
 {
+	st_NETWORK_PACKET_HEADER Header;
+	char Packet[100];
+
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = actionMove;
 
@@ -199,6 +202,13 @@ void CPlayerObject::SetActionMove(DWORD actionMove)
 	{
 		if (m_iDirCur == RIGHT)			SetSprite(ePLAYER_MOVE_R01, ePLAYER_MOVE_R_MAX, 4);
 		else if (m_iDirCur == LEFT) 	SetSprite(ePLAYER_MOVE_L01, ePLAYER_MOVE_L_MAX, 4);
+	}
+
+	if (m_dwActionCur != m_dwActionOld)
+	{
+		MakePacket_MoveStart(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
+		SendQ.Put((char *)&Header, sizeof(Header));
+		SendQ.Put(Packet, Header.bySize);
 	}
 }
 
