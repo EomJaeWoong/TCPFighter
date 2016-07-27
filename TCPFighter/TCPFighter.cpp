@@ -22,8 +22,8 @@ CSpriteDib *g_pSpriteDib;
 CFrameSkip g_FrameSkip(50);
 SOCKET client_sock;
 BOOL g_bActiveApp;
-CAyaStreamSQ SendQ;
-CAyaStreamSQ RecvQ;
+CAyaStreamSQ SendQ(10000);
+CAyaStreamSQ RecvQ(10000);
 int retval; 
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
@@ -468,7 +468,8 @@ void ReadProc()
 
 			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
 			{
-				if (gObject[iCnt] != NULL && stPacketMoveStart.ID == gObject[iCnt]->GetObjectID())
+				if (gObject[iCnt] != NULL && stPacketMoveStart.ID == gObject[iCnt]->GetObjectID() &&
+					g_pPlayerObject->GetObjectID() != stPacketMoveStart.ID)
 				{
 					gObject[iCnt]->ActionInput(stPacketMoveStart.Direction);
 					break;
@@ -539,6 +540,21 @@ void ReadProc()
 					gObject[iCnt]->ActionInput(dfACTION_ATTACK3);
 					gObject[iCnt]->SetPosition(stPacketAttack3.X, stPacketAttack3.Y);
 					break;
+				}
+			}
+			break;
+
+		case dfPACKET_SC_DAMAGE :
+			stPACKET_SC_DAMAGE stPacketDamage;
+			RecvQ.Get((char *)&stPacketDamage, sizeof(stPacketDamage));
+
+			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
+			{
+				if (gObject[iCnt] != NULL && stPacketDamage.DamageID == gObject[iCnt]->GetObjectID())
+				{
+					CPlayerObject *pPlayer;
+					pPlayer = (CPlayerObject *)gObject[iCnt];
+					pPlayer->SetHP(stPacketDamage.DamageHP);
 				}
 			}
 			break;
