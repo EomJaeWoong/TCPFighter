@@ -88,50 +88,42 @@ void CPlayerObject::InputActionProc()
 		break;
 
 	case dfACTION_MOVE_LL :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X < dfRANGE_MOVE_LEFT ? dfRANGE_MOVE_LEFT : GetCurX() - dfSPEED_PLAYER_X
-			, GetCurY());
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY());
 		SetActionMove(dfACTION_MOVE_LL);
 		break;
 
 	case dfACTION_MOVE_RR :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X > dfRANGE_MOVE_RIGHT ? dfRANGE_MOVE_RIGHT : GetCurX() + dfSPEED_PLAYER_X
-			, GetCurY());
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY());
 		SetActionMove(dfACTION_MOVE_RR);
 		break;
 
 	case dfACTION_MOVE_DD:
-		SetPosition(GetCurX(),
-			GetCurY() + dfSPEED_PLAYER_Y > dfRANGE_MOVE_BOTTOM ? dfRANGE_MOVE_BOTTOM : GetCurY() + dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX(), GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_DD);
 		break;
 
 	case dfACTION_MOVE_UU :
-		SetPosition(GetCurX(), 
-			GetCurY() - dfSPEED_PLAYER_Y < dfRANGE_MOVE_TOP ? dfRANGE_MOVE_TOP : GetCurY() - dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX(), GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_UU);
 		break;
 
 	case dfACTION_MOVE_LD :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X < dfRANGE_MOVE_LEFT ? dfRANGE_MOVE_LEFT : GetCurX() - dfSPEED_PLAYER_X
-			, GetCurY() + dfSPEED_PLAYER_Y > dfRANGE_MOVE_BOTTOM ? dfRANGE_MOVE_BOTTOM : GetCurY() + dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_LD);
 		break;
 
 	case dfACTION_MOVE_LU :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X < dfRANGE_MOVE_LEFT ? dfRANGE_MOVE_LEFT : GetCurX() - dfSPEED_PLAYER_X
-			, GetCurY() - dfSPEED_PLAYER_Y < dfRANGE_MOVE_TOP ? dfRANGE_MOVE_TOP : GetCurY() - dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_LU);
 		break;
 
 	case dfACTION_MOVE_RD :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X > dfRANGE_MOVE_RIGHT ? dfRANGE_MOVE_RIGHT : GetCurX() + dfSPEED_PLAYER_X
-			, GetCurY() + dfSPEED_PLAYER_Y > dfRANGE_MOVE_BOTTOM ? dfRANGE_MOVE_BOTTOM : GetCurY() + dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_RD);
 		break;
 
 	case dfACTION_MOVE_RU :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X > dfRANGE_MOVE_RIGHT ? dfRANGE_MOVE_RIGHT : GetCurX() + dfSPEED_PLAYER_X
-			, GetCurY() - dfSPEED_PLAYER_Y < dfRANGE_MOVE_TOP ? dfRANGE_MOVE_TOP : GetCurY() - dfSPEED_PLAYER_Y);
+		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_RU);
 		break;
 	}
