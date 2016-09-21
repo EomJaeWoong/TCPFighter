@@ -3,27 +3,49 @@
 
 #include "stdafx.h"
 #include "TCPFighter.h"
-#include "ScreenDib.h"
-#include "SpriteDib.h"
-#include "BaseObject.h"
-#include "PlayerObject.h"
-#include "EffectObject.h"
-#include "FrameSkip.h"
-
-#define MAX_OBJECT 100
 
 // 전역 변수:
 HINSTANCE hInst;	// 현재 인스턴스입니다.
 HWND g_hWnd;
+
+/*----------------------------------------------------------------------------*/
+// 자신(플레이어)
+/*----------------------------------------------------------------------------*/
 CBaseObject *g_pPlayerObject;
-CBaseObject *gObject[MAX_OBJECT];
-CScreenDib g_cScreenDib(640, 480, 32);
+
+/*----------------------------------------------------------------------------*/
+// 오브젝트들(플레이어, 이펙트)
+/*----------------------------------------------------------------------------*/
+Objects g_Object;
+
+/*----------------------------------------------------------------------------*/
+// 스크린과 스프라이트
+/*----------------------------------------------------------------------------*/
+CScreenDib g_cScreenDib(dfSCREEN_WIDTH, dfSCREEN_HEIGHT, 32);
 CSpriteDib *g_pSpriteDib;
+
+/*----------------------------------------------------------------------------*/
+// 프레임
+/*----------------------------------------------------------------------------*/
 CFrameSkip g_FrameSkip(50);
+
+/*----------------------------------------------------------------------------*/
+// 타일 맵
+/*----------------------------------------------------------------------------*/
+CMap g_cTileMap;
+
+/*----------------------------------------------------------------------------*/
+// Client Socket
+/*----------------------------------------------------------------------------*/
 SOCKET client_sock;
 BOOL g_bActiveApp;
+
+/*----------------------------------------------------------------------------*/
+// Client Send,Recv Buffer
+/*----------------------------------------------------------------------------*/
 CAyaStreamSQ SendQ(10000);
 CAyaStreamSQ RecvQ(10000);
+
 int retval; 
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
@@ -34,7 +56,7 @@ void KeyProcess();
 void Action();
 void Draw();
 void ConnectProc();
-void ReadProc();
+BOOL ReadProc();
 void WriteProc();
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
@@ -77,9 +99,9 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	ShowWindow(g_hWnd, nCmdShow);
 	UpdateWindow(g_hWnd);
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////
 	// 게임, 네트워크 초기화
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////
 	InitialGame();
 	InitialNetwork(&client_sock, &g_hWnd);
 
@@ -153,7 +175,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (WSAGETSELECTEVENT(lParam))
 		{
 		case FD_CONNECT :
-			ConnectProc();
 			break;
 
 		case FD_CLOSE :
@@ -186,13 +207,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 게임 초기화
-// 스프라이트 생성과 로드 
+// - 스프라이트 생성과 로드 
+// - 내 캐릭터 생성
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void InitialGame()
 {
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	// 스프라이트 로드
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	g_pSpriteDib = new CSpriteDib(eSPRITE_MAX, 0x00ffffff);
 
-	g_pSpriteDib->LoadDibSprite(eMAP, L"Data\\_Map.bmp", 0, 0);
+	g_pSpriteDib->LoadDibSprite(eMAP, L"Data\\Tile_01.bmp", 0, 0);
 
 	// 맵 추가
 	g_pSpriteDib->LoadDibSprite(ePLAYER_STAND_L01, L"Data\\Stand_L_01.bmp", 71, 90);
@@ -271,6 +296,7 @@ void InitialGame()
 	g_pSpriteDib->LoadDibSprite(eGUAGE_HP, L"Data\\HPGuage.bmp", 0, 0);
 
 	g_pSpriteDib->LoadDibSprite(eSHADOW, L"Data\\Shadow.bmp", 32, 4);
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -329,11 +355,16 @@ void KeyProcess()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Action()
 {
-	for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-	{
-		if (gObject[iCnt] != NULL)
-			gObject[iCnt]->Action(1);
-	}
+	ObjectsIter oIter;
+
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
+		oIter->second->Action(1);
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	// TileMap 좌표 지정
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	if (g_pPlayerObject != NULL)
+		g_cTileMap.SetDrawPos(g_pPlayerObject->GetCurX(), g_pPlayerObject->GetCurY());
 
 	//y축 정렬 시키기
 	//이펙트는 제일 뒤로 밀기
@@ -347,9 +378,39 @@ void Draw()
 	BYTE *bypDest = g_cScreenDib.GetDibBuffer();
 	int iDestWidth = g_cScreenDib.GetWidth();
 	int iDestHeight = g_cScreenDib.GetHeight();
-	int iDestPitch = g_cScreenDib.GetPitch();
+	int iDestPitch = g_cScreenDib.GetPitch();	
 
-	g_pSpriteDib->DrawSprite(eMAP, 0, 0, bypDest, iDestWidth, iDestHeight, iDestPitch);
+	if (g_pPlayerObject != NULL)
+	{
+		HDC hdc = GetDC(g_hWnd);
+		WCHAR point[20];
+		wsprintf(point, L"%d, %d", g_pPlayerObject->GetCurX(), g_pPlayerObject->GetCurY());
+		TextOut(hdc, 0, 0, point, wcslen(point));
+		ReleaseDC(g_hWnd, hdc);
+	}
+	g_cTileMap.Draw(g_pSpriteDib, bypDest, iDestWidth, iDestHeight, iDestPitch);
+
+	ObjectsIter oIter;
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Effect, Player 정렬
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+	for (int iCnt = 0; iCnt < MAX_OBJECT - 1; iCnt++)
+	{
+		for (int iCnt2 = 0; iCnt2 < MAX_OBJECT - 1 - iCnt; iCnt2++)
+		{
+			if (gObject[iCnt2] != NULL && gObject[iCnt2 + 1] != NULL &&
+				gObject[iCnt2]->GetObjectType() == eTYPE_EFFECT && gObject[iCnt]->GetObjectType() == eTYPE_PLAYER)
+			{
+				CBaseObject *pTemp;
+				pTemp = gObject[iCnt2];
+				gObject[iCnt2] = gObject[iCnt2 + 1];
+				gObject[iCnt2 + 1] = pTemp;
+			}
+		}
+	}
+	
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Y축 정렬
@@ -368,213 +429,136 @@ void Draw()
 			}
 		}
 	}
-
-	for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-	{
-		if (gObject[iCnt] != NULL)
-			gObject[iCnt]->Draw(g_pSpriteDib, bypDest, iDestWidth, iDestHeight, iDestPitch);
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 서버 접속 완료후 실행
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-void ConnectProc()
-{
-	stPACKET_SC_CREATE_MY_CHARACTER packet;
-	while (1){
-		retval = recv(client_sock, (char *)&packet, sizeof(stPACKET_SC_CREATE_MY_CHARACTER), 0);
-		if (retval == SOCKET_ERROR)
-		{
-			if (WSAGetLastError() != WSAEWOULDBLOCK)
-			{
-				return;
-			}
-		}
-
-		if (packet.Header.byCode == (BYTE)0x89 && packet.Header.byType == dfPACKET_SC_CREATE_MY_CHARACTER
-			)
-		{
-			g_pPlayerObject = new CPlayerObject(TRUE, packet.ID, eTYPE_PLAYER, packet.HP, packet.Direction);
-			g_pPlayerObject->SetPosition(packet.X, packet.Y);
-			gObject[0] = g_pPlayerObject;
-			break;
-		}
-	}
+	*/
+	
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
+		oIter->second->Draw(g_pSpriteDib, bypDest, iDestWidth, iDestHeight, iDestPitch);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Packet 읽기
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-void ReadProc()
+BOOL ReadProc()
 {
 	st_NETWORK_PACKET_HEADER Header;
-	retval = recv(client_sock, RecvQ.GetWriteBufferPtr(), RecvQ.GetNotBrokenPutSize(), 0);
-
-	if (retval == 0)
-		return;
-
-	if (retval == SOCKET_ERROR)
-	{
-		if (WSAGetLastError() == WSAEWOULDBLOCK)
-			return;
-		else
-			MessageBox(g_hWnd, L"ReadProc", NULL, NULL);
-	}
-	RecvQ.MoveWritePos(retval);
+	CNPacket cPacket;
 
 	while (1)
 	{
+		retval = recv(client_sock, RecvQ.GetWriteBufferPtr(), RecvQ.GetNotBrokenPutSize(), 0);
+
+		if (retval == 0)
+			return FALSE;
+
+		if (retval == SOCKET_ERROR)
+		{
+			if (WSAGetLastError() == WSAEWOULDBLOCK)
+				return FALSE;
+			else
+				MessageBox(g_hWnd, L"ReadProc", NULL, NULL);
+		}
+		RecvQ.MoveWritePos(retval);
+
+		//--------------------------------------------------------------------------------------*/
+		//RecvQ 용량이 header보다 작은지 검사
+		/*--------------------------------------------------------------------------------------*/
 		if (RecvQ.GetUseSize() < sizeof(Header))
-			return;
+			return FALSE;
 
 		RecvQ.Peek((char *)&Header, sizeof(Header));
 
+		/*--------------------------------------------------------------------------------------*/
+		//header code 검사
+		/*--------------------------------------------------------------------------------------*/
 		if (Header.byCode != (BYTE)0x89)
-			return;
+			return FALSE;
 
+		/*--------------------------------------------------------------------------------------*/
+		//header + payload 용량이 RecvQ용량보다 큰지 검사
+		/*--------------------------------------------------------------------------------------*/
 		if (RecvQ.GetUseSize() < Header.bySize + sizeof(Header))
-			return;
+			return FALSE;
 
 		RecvQ.RemoveData(sizeof(Header));
 
+		/*--------------------------------------------------------------------------------------*/
+		//payload를 cPacket에 뽑고 같은지 검사
+		/*--------------------------------------------------------------------------------------*/
+		if (Header.bySize !=
+			RecvQ.Get((char *)cPacket.GetBufferPtr(), Header.bySize))
+			return FALSE;
+
+		RecvQ.MoveWritePos(Header.bySize);
+
+		//TODO : 패킷의 endcode 검사해야됨
+
 		switch (Header.byType)
 		{
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// 다른 유저 생성
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////
+		// 내 캐릭터 생성
+		//////////////////////////////////////////////////////////////////////////////////////////
+		case dfPACKET_SC_CREATE_MY_CHARACTER :
+			return recvProc_CreateMyCharacter(&cPacket);
+			break;
+
+		//////////////////////////////////////////////////////////////////////////////////////////
+		// 다른 캐릭터 생성
+		//////////////////////////////////////////////////////////////////////////////////////////
 		case dfPACKET_SC_CREATE_OTHER_CHARACTER :
-			stPACKET_SC_CREATE_OTHER_CHARACTER stPacketCreateCharacter;
-			RecvQ.Get((char *)&stPacketCreateCharacter, sizeof(stPacketCreateCharacter));
-
-			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-			{
-				if (gObject[iCnt] == NULL)
-				{
-					gObject[iCnt] = new CPlayerObject(FALSE, stPacketCreateCharacter.ID,
-						eTYPE_PLAYER, stPacketCreateCharacter.HP, stPacketCreateCharacter.Direction);
-					gObject[iCnt]->SetPosition(stPacketCreateCharacter.X, stPacketCreateCharacter.Y);
-					break;
-				}
-			}
+			return recvProc_CreateOtherCharacter(&cPacket);
 			break;
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////
 		// 캐릭터 제거
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////
 		case dfPACKET_SC_DELETE_CHARACTER :
-			stPACKET_SC_DELETE_CHARACTER stPacketDelCharacter;
-			RecvQ.Get((char *)&stPacketDelCharacter, sizeof(stPacketDelCharacter));
-
-			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-			{
-				if (gObject[iCnt] != NULL && stPacketDelCharacter.ID == gObject[iCnt]->GetObjectID())
-				{
-					delete gObject[iCnt];
-					gObject[iCnt] = NULL;
-					break;
-				}
-			}
+			return recvProc_DeleteCharacter(&cPacket);
 			break;
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////
 		// 움직임 시작
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////
 		case dfPACKET_SC_MOVE_START :
-			stPACKET_SC_MOVE_START stPacketMoveStart;
-			RecvQ.Get((char *)&stPacketMoveStart, sizeof(stPacketMoveStart));
-
-			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-			{
-				if (gObject[iCnt] != NULL && stPacketMoveStart.ID == gObject[iCnt]->GetObjectID() &&
-					g_pPlayerObject->GetObjectID() != stPacketMoveStart.ID)
-				{
-					gObject[iCnt]->ActionInput(stPacketMoveStart.Direction);
-					break;
-				}
-			}
+			return recvProc_MoveStart(&cPacket);
 			break;
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////
 		// 움직임 멈춤
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////
 		case dfPACKET_SC_MOVE_STOP :
-			stPACKET_SC_MOVE_STOP stPacketMoveStop;
-			RecvQ.Get((char *)&stPacketMoveStop, sizeof(stPacketMoveStop));
-
-			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-			{
-				if (gObject[iCnt] != NULL && stPacketMoveStop.ID == gObject[iCnt]->GetObjectID() &&
-					g_pPlayerObject->GetObjectID() != stPacketMoveStop.ID)
-				{
-					gObject[iCnt]->ActionInput(dfACTION_STAND);
-					gObject[iCnt]->SetPosition(stPacketMoveStop.X, stPacketMoveStop.Y);
-					break;
-				}
-			}
+			return recvProc_MoveStop(&cPacket);
 			break;
 
+		/////////////////////////////////////////////////////////////////////////////////////////
+		// 공격 1
+		/////////////////////////////////////////////////////////////////////////////////////////
 		case dfPACKET_SC_ATTACK1 :
-			stPACKET_SC_ATTACK1 stPacketAttack1;
-			RecvQ.Get((char *)&stPacketAttack1, sizeof(stPacketAttack1));
-
-			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-			{
-				if (gObject[iCnt] != NULL && stPacketAttack1.ID == gObject[iCnt]->GetObjectID() &&
-					g_pPlayerObject->GetObjectID() != stPacketMoveStop.ID)
-				{
-					gObject[iCnt]->SetPosition(stPacketAttack1.X, stPacketAttack1.Y);
-					gObject[iCnt]->ActionInput(dfACTION_ATTACK1);
-					break;
-				}
-			}
+			return recvProc_Attack1(&cPacket);
 			break;
 
+		/////////////////////////////////////////////////////////////////////////////////////////
+		// 공격 2
+		/////////////////////////////////////////////////////////////////////////////////////////
 		case dfPACKET_SC_ATTACK2 :
-			stPACKET_SC_ATTACK2 stPacketAttack2;
-			RecvQ.Get((char *)&stPacketAttack2, sizeof(stPacketAttack2));
-
-			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-			{
-				if (gObject[iCnt] != NULL && stPacketAttack2.ID == gObject[iCnt]->GetObjectID() &&
-					g_pPlayerObject->GetObjectID() != stPacketMoveStop.ID)
-				{
-					gObject[iCnt]->ActionInput(dfACTION_ATTACK2);
-					gObject[iCnt]->SetPosition(stPacketAttack2.X, stPacketAttack2.Y);
-					break;
-				}
-			}
+			return recvProc_Attack2(&cPacket);
 			break;
 
+		/////////////////////////////////////////////////////////////////////////////////////////
+		// 공격 3
+		/////////////////////////////////////////////////////////////////////////////////////////
 		case dfPACKET_SC_ATTACK3 :
-			stPACKET_SC_ATTACK1 stPacketAttack3;
-			RecvQ.Get((char *)&stPacketAttack3, sizeof(stPacketAttack3));
-
-			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-			{
-				if (gObject[iCnt] != NULL && stPacketAttack3.ID == gObject[iCnt]->GetObjectID() &&
-					g_pPlayerObject->GetObjectID() != stPacketAttack3.ID)
-				{
-					gObject[iCnt]->ActionInput(dfACTION_ATTACK3);
-					gObject[iCnt]->SetPosition(stPacketAttack3.X, stPacketAttack3.Y);
-					break;
-				}
-			}
+			return recvProc_Attack3(&cPacket);
 			break;
 
+		/////////////////////////////////////////////////////////////////////////////////////////
+		// 데미지
+		/////////////////////////////////////////////////////////////////////////////////////////
 		case dfPACKET_SC_DAMAGE :
-			stPACKET_SC_DAMAGE stPacketDamage;
-			RecvQ.Get((char *)&stPacketDamage, sizeof(stPacketDamage));
+			return recvProc_Damage(&cPacket);
+			break;
 
-			for (int iCnt = 0; iCnt < MAX_OBJECT; iCnt++)
-			{
-				if (gObject[iCnt] != NULL && stPacketDamage.DamageID == gObject[iCnt]->GetObjectID())
-				{
-					CPlayerObject *pPlayer;
-					pPlayer = (CPlayerObject *)gObject[iCnt];
-					pPlayer->SetHP(stPacketDamage.DamageHP);
-				}
-			}
+		case dfPACKET_SC_SYNC :
+			return TRUE;
 			break;
 		}
 	}

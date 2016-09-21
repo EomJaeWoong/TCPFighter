@@ -82,10 +82,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseObject.h" />
+    <ClInclude Include="CMap.h" />
     <ClInclude Include="EffectObject.h" />
     <ClInclude Include="eSprite.h" />
     <ClInclude Include="FrameSkip.h" />
     <ClInclude Include="Network.h" />
+    <ClInclude Include="NPacket.h" />
     <ClInclude Include="ObjectType.h" />
     <ClInclude Include="PacketDefine.h" />
     <ClInclude Include="PlayerObject.h" />
@@ -101,7 +103,9 @@
     <ClCompile Include="BaseObject.cpp" />
     <ClCompile Include="EffectObject.cpp" />
     <ClCompile Include="FrameSkip.cpp" />
+    <ClCompile Include="CMap.cpp" />
     <ClCompile Include="Network.cpp" />
+    <ClCompile Include="NPacket.cpp" />
     <ClCompile Include="PlayerObject.cpp" />
     <ClCompile Include="ScreenDib.cpp" />
     <ClCompile Include="SpriteDib.cpp" />

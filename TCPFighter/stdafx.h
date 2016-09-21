@@ -20,14 +20,32 @@
 #include <tchar.h>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
+#include <map>
+
+using namespace std;
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 #include "eSprite.h"
 #include "ObjectType.h"
+#include "ScreenDib.h"
 #include "SpriteDib.h"
 #include "PacketDefine.h"
+#include "BaseObject.h"
+#include "PlayerObject.h"
+#include "EffectObject.h"
 #include "StreamQueue.h"
+#include "NPacket.h"
 #include "Network.h"
+#include "FrameSkip.h"
+#include "CMap.h"
+
+#define Objects			map<DWORD, CBaseObject *>
+#define ObjectsIter		Objects::iterator
 
 extern CAyaStreamSQ SendQ;
 extern CAyaStreamSQ RecvQ;
+
+extern Objects g_Object;
+extern CBaseObject *g_pPlayerObject;
+
+extern CMap g_cTileMap;

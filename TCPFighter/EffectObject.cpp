@@ -2,10 +2,12 @@
 #include "BaseObject.h"
 #include "EffectObject.h"
 
-CEffectObject::CEffectObject(int iObjectID, int iObjectType)
+CEffectObject::CEffectObject(int iObjectID, int iObjectType, int iX, int iY, 
+	int iFrameDelay, int iSpriteStart, int iSpriteEnd)
 	:CBaseObject(iObjectID, iObjectType)
 {
-
+	SetPosition(iX, iY);
+	SetSprite(iSpriteStart, iSpriteEnd, iFrameDelay);
 }
 
 CEffectObject::~CEffectObject()
@@ -13,12 +15,18 @@ CEffectObject::~CEffectObject()
 
 }
 
-void CEffectObject::Action()
+DWORD CEffectObject::Action(DWORD dwParam)
 {
+	if (isEndFrame())
+		return TRUE;
 
+	NextFrame();
+	return FALSE;
 }
 
-void CEffectObject::Draw()
+void CEffectObject::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth
+	, int iDestHeight, int iDestPitch)
 {
-
+	pSprite->DrawSprite(GetSprite(), GetCurX(), GetCurY(), bypDest
+		, iDestWidth, iDestHeight, iDestPitch);
 }

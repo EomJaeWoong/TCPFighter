@@ -27,6 +27,11 @@
 #define RIGHT 4
 
 //-----------------------------------------------------------------
+// 게임 화면 크기
+//-----------------------------------------------------------------
+#define dfSCREEN_WIDTH	640
+#define dfSCREEN_HEIGHT 480
+//-----------------------------------------------------------------
 // 캐릭터 이동 속도
 //-----------------------------------------------------------------
 #define dfSPEED_PLAYER_X	3
@@ -37,8 +42,9 @@
 //-----------------------------------------------------------------
 #define dfRANGE_MOVE_TOP	50
 #define dfRANGE_MOVE_LEFT	10
-#define dfRANGE_MOVE_RIGHT	630
-#define dfRANGE_MOVE_BOTTOM	470
+#define dfRANGE_MOVE_RIGHT	6390
+#define dfRANGE_MOVE_BOTTOM	6390
+
 enum e_OBJECT_TYPE
 {
 	eTYPE_PLAYER,

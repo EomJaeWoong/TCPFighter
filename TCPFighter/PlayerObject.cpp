@@ -14,6 +14,10 @@ CPlayerObject::~CPlayerObject()
 
 }
 
+/*---------------------------------------------------------------------------------------------------------*/
+// Action
+// 메인 액션
+/*---------------------------------------------------------------------------------------------------------*/
 DWORD CPlayerObject::Action(DWORD dwParam)
 {
 	NextFrame();
@@ -21,6 +25,10 @@ DWORD CPlayerObject::Action(DWORD dwParam)
 	return FALSE;
 }
 
+/*---------------------------------------------------------------------------------------------------------*/
+// 액션 처리부
+// 입력된 액션을 처리한다
+/*---------------------------------------------------------------------------------------------------------*/
 void CPlayerObject::ActionProc()
 {
 	// 공격이 안끝났을 때
@@ -59,92 +67,140 @@ void CPlayerObject::ActionProc()
 	}
 }
 
+/*---------------------------------------------------------------------------------------------------------*/
+// Draw
+// 해당 객체를 Screen에 그린다
+/*---------------------------------------------------------------------------------------------------------*/
 void CPlayerObject::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth, int iDestHeight, int iDestPitch)
 {
-	pSprite->DrawSprite50(eSHADOW, GetCurX(), GetCurY(), bypDest, iDestWidth,
-		iDestHeight, iDestPitch);
+	int iDrawX = GetCurX() - g_cTileMap.GetDrawPosX();
+	int	iDrawY = GetCurY() - g_cTileMap.GetDrawPosY();
+	
+	if (GetCurX() < dfSCREEN_WIDTH / 2)					iDrawX = GetCurX();
+	if (GetCurY() < dfSCREEN_HEIGHT / 2 + 20)			iDrawY = GetCurY();
+	if (GetCurX() + dfSCREEN_WIDTH / 2 > dfMAP_WIDTH)	
+		iDrawX = dfSCREEN_WIDTH - (dfMAP_WIDTH - GetCurX());
+	if (GetCurY() + dfSCREEN_HEIGHT / 2 - 20 > dfMAP_HEIGHT)
+		iDrawY = dfSCREEN_HEIGHT - (dfMAP_HEIGHT - GetCurY());
+
+	pSprite->DrawSprite50(eSHADOW, iDrawX, iDrawY, bypDest, iDestWidth, iDestHeight, iDestPitch);
 	
 	if (m_bPlayerCharacter)
-		pSprite->DrawSpriteRed(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
-			iDestHeight, iDestPitch);
-	else
-		pSprite->DrawSprite(GetSprite(), GetCurX(), GetCurY(), bypDest, iDestWidth,
-		iDestHeight, iDestPitch);
+		pSprite->DrawSpriteRed(GetSprite(), iDrawX, iDrawY, bypDest, iDestWidth, iDestHeight, iDestPitch);
 
-	pSprite->DrawSprite(eGUAGE_HP, GetCurX() - 35, GetCurY() + 9, bypDest, iDestWidth,
-		iDestHeight, iDestPitch, m_chHP);
+	else
+		pSprite->DrawSprite(GetSprite(), iDrawX, iDrawY, bypDest, iDestWidth, iDestHeight, iDestPitch);
+
+	pSprite->DrawSprite(eGUAGE_HP, iDrawX - 35, iDrawY + 9, bypDest, iDestWidth, iDestHeight, iDestPitch, m_chHP);
 }
 
-/*-----------------------------------------------------------------------------------------------------------
- 입력 액션 처리
- 액션 셋팅과 방향, 스프라이트를 설정한다.
------------------------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------------------*/
+// 입력 액션 처리
+// 액션 셋팅과 방향, 스프라이트를 설정한다.
+/*---------------------------------------------------------------------------------------------------------*/
 void CPlayerObject::InputActionProc()
 {
 	switch (m_dwActionInput)
 	{
-	case dfACTION_STAND:
+	case dfACTION_STAND:														//서있을 때
 		SetActionStand();
 		break;
 
-	case dfACTION_MOVE_LL :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY());
+	case dfACTION_MOVE_LL :														//왼쪽
+		if (GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT)
+			SetPosition(GetCurX(), GetCurY());
+		else
+			SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY());
 		SetActionMove(dfACTION_MOVE_LL);
 		break;
 
-	case dfACTION_MOVE_RR :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY());
+	case dfACTION_MOVE_RR :														//오른쪽
+		if (GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT)
+			SetPosition(GetCurX(), GetCurY());
+		else
+			SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY());
 		SetActionMove(dfACTION_MOVE_RR);
 		break;
 
-	case dfACTION_MOVE_DD:
-		SetPosition(GetCurX(), GetCurY() + dfSPEED_PLAYER_Y);
+	case dfACTION_MOVE_DD:														//아래
+		if (GetCurY() + dfSPEED_PLAYER_Y >= dfRANGE_MOVE_BOTTOM)
+			SetPosition(GetCurX(), GetCurY());
+		else
+			SetPosition(GetCurX(), GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_DD);
 		break;
 
-	case dfACTION_MOVE_UU :
-		SetPosition(GetCurX(), GetCurY() - dfSPEED_PLAYER_Y);
+	case dfACTION_MOVE_UU :														//위
+		if (GetCurY() - dfSPEED_PLAYER_Y <= dfRANGE_MOVE_TOP)
+			SetPosition(GetCurX(), GetCurY());
+		else
+			SetPosition(GetCurX(), GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_UU);
 		break;
 
-	case dfACTION_MOVE_LD :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
+	case dfACTION_MOVE_LD :														//왼쪽아래
+		if ((GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT) ||
+			(GetCurY() + dfSPEED_PLAYER_Y >= dfRANGE_MOVE_BOTTOM))
+			SetPosition(GetCurX(), GetCurY());
+		else
+			SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_LD);
 		break;
 
-	case dfACTION_MOVE_LU :
-		SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
+	case dfACTION_MOVE_LU :														//왼쪽위
+		if ((GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT) ||
+			(GetCurY() - dfSPEED_PLAYER_Y <= dfRANGE_MOVE_TOP)) 
+			SetPosition(GetCurX(), GetCurY());
+		else
+			SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_LU);
 		break;
 
-	case dfACTION_MOVE_RD :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
+	case dfACTION_MOVE_RD :														//오른쪽아래
+		if ((GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT) ||
+			(GetCurY() + dfSPEED_PLAYER_Y >= dfRANGE_MOVE_BOTTOM))
+			SetPosition(GetCurX(), GetCurY());
+		else
+			SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() + dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_RD);
 		break;
 
-	case dfACTION_MOVE_RU :
-		SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
+	case dfACTION_MOVE_RU :														//오른쪽 위
+		if ((GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT) ||
+			(GetCurY() - dfSPEED_PLAYER_Y <= dfRANGE_MOVE_TOP))
+			SetPosition(GetCurX(), GetCurY());
+		else
+			SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY() - dfSPEED_PLAYER_Y);
 		SetActionMove(dfACTION_MOVE_RU);
 		break;
 	}
 }
 
+/*---------------------------------------------------------------------------------------------------------*/
+// 플레이어 확인
+// 해당 플레이어인지 확인한다
+/*---------------------------------------------------------------------------------------------------------*/
 BOOL CPlayerObject::isPlayer()
 {
 	if (m_bPlayerCharacter == TRUE)	return true;
 	else							return false;
 }
 
+/*---------------------------------------------------------------------------------------------------------*/
+// 방향 확인
+// 플레이어 방향 확인
+/*---------------------------------------------------------------------------------------------------------*/
 int CPlayerObject::GetDirection()
 {
 	return m_iDirCur;
 }
 
+/*---------------------------------------------------------------------------------------------------------*/
+// 공격 액션 설정
+// 해당 공격 액션을 설정한다
+/*---------------------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetActionAttack1()	
 { 
-	st_NETWORK_PACKET_HEADER Header;
-	char Packet[100];
-
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK1;
 
@@ -156,18 +212,11 @@ void CPlayerObject::SetActionAttack1()
 	}
 
 	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur != dfACTION_STAND)
-	{
-		int len = MakePacket_Attack1(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
-		SendQ.Put((char *)&Header, sizeof(Header));
-		SendQ.Put(Packet, len - sizeof(Header));
-	}
+		sendProc_Attack1(GetDirection(), GetCurX(), GetCurY());
 }
 
 void CPlayerObject::SetActionAttack2()	
 {
-	st_NETWORK_PACKET_HEADER Header;
-	char Packet[100];
-
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK2;
 
@@ -179,18 +228,11 @@ void CPlayerObject::SetActionAttack2()
 	}
 
 	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur != dfACTION_STAND)
-	{
-		int len = MakePacket_Attack2(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
-		SendQ.Put((char *)&Header, sizeof(Header));
-		SendQ.Put(Packet, len - sizeof(Header));
-	}
+		sendProc_Attack2(GetDirection(), GetCurX(), GetCurY());
 }
 
 void CPlayerObject::SetActionAttack3()	
 {
-	st_NETWORK_PACKET_HEADER Header;
-	char Packet[100];
-
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_ATTACK3;
 	if (m_dwActionOld != m_dwActionCur){
@@ -201,11 +243,7 @@ void CPlayerObject::SetActionAttack3()
 	}
 
 	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur != dfACTION_STAND)
-	{
-		int len = MakePacket_Attack3(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
-		SendQ.Put((char *)&Header, sizeof(Header));
-		SendQ.Put(Packet, len - sizeof(Header));
-	}
+		sendProc_Attack3(GetDirection(), GetCurX(), GetCurY());
 }
 
 /*---------------------------------------------------------------------------------------------*/
@@ -213,9 +251,6 @@ void CPlayerObject::SetActionAttack3()
 /*---------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetActionMove(DWORD actionMove)		
 {
-	st_NETWORK_PACKET_HEADER Header;
-	char Packet[100];
-
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = actionMove;
 
@@ -229,11 +264,7 @@ void CPlayerObject::SetActionMove(DWORD actionMove)
 	}
 
 	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur != dfACTION_STAND)
-	{
-		int len = MakePacket_MoveStart(&Header, Packet, m_dwActionCur, GetCurX(), GetCurY());
-		SendQ.Put((char *)&Header, sizeof(Header));
-		SendQ.Put(Packet, len - sizeof(Header));
-	}
+		sendProc_MoveStart(m_dwActionCur, GetCurX(), GetCurY());
 }
 
 /*---------------------------------------------------------------------------------------------*/
@@ -241,9 +272,6 @@ void CPlayerObject::SetActionMove(DWORD actionMove)
 /*---------------------------------------------------------------------------------------------*/
 void CPlayerObject::SetActionStand()	
 {
-	st_NETWORK_PACKET_HEADER Header;
-	char Packet[100];
-
 	m_dwActionOld = m_dwActionCur;
 	m_dwActionCur = dfACTION_STAND;
 
@@ -254,11 +282,7 @@ void CPlayerObject::SetActionStand()
 
 	if (isPlayer() && m_dwActionCur != m_dwActionOld && m_dwActionCur == dfACTION_STAND &&
 		m_dwActionOld != dfACTION_ATTACK1 && m_dwActionOld != dfACTION_ATTACK2 && m_dwActionOld != dfACTION_ATTACK3)
-	{
-		int len = MakePacket_MoveStop(&Header, Packet, m_iDirCur, GetCurX(), GetCurY());
-		SendQ.Put((char *)&Header, sizeof(Header));
-		SendQ.Put(Packet, len - sizeof(Header));
-	}
+		sendProc_MoveStop(GetDirection(), GetCurX(), GetCurY());
 }
 
 /*---------------------------------------------------------------------------------------------*/

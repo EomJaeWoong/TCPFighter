@@ -4,11 +4,12 @@
 class CEffectObject : public CBaseObject
 {
 public :
-	CEffectObject(int iObjectID, int iObjectType);
+	CEffectObject(int iObjectID, int iObjectType, int iX, int iY,
+		int iFrameDelay, int iSpriteStart, int iSpriteEnd);
 	~CEffectObject();
 
-	void Action();
-	void Draw();
+	DWORD Action(DWORD dwParam);
+	void Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth, int iDestHeight, int iDestPitch);
 
 private :
 	BOOL m_bEffectStart;

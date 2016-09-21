@@ -31,6 +31,12 @@
     <Filter Include="소스 파일\Network">
       <UniqueIdentifier>{582a8d5a-b38f-49c4-b1c7-4f66721aa59e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Structure">
+      <UniqueIdentifier>{05244b85-1544-4692-adda-56b6a5fc3b28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Structure">
+      <UniqueIdentifier>{513ac96d-1a82-4120-95f0-b9c99db71e75}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -79,7 +85,13 @@
       <Filter>헤더 파일\Network</Filter>
     </ClInclude>
     <ClInclude Include="StreamQueue.h">
-      <Filter>소스 파일</Filter>
+      <Filter>헤더 파일\Structure</Filter>
+    </ClInclude>
+    <ClInclude Include="NPacket.h">
+      <Filter>헤더 파일\Structure</Filter>
+    </ClInclude>
+    <ClInclude Include="CMap.h">
+      <Filter>헤더 파일\Content</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -111,7 +123,13 @@
       <Filter>소스 파일\Network</Filter>
     </ClCompile>
     <ClCompile Include="StreamQueue.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Structure</Filter>
+    </ClCompile>
+    <ClCompile Include="NPacket.cpp">
+      <Filter>소스 파일\Structure</Filter>
+    </ClCompile>
+    <ClCompile Include="CMap.cpp">
+      <Filter>소스 파일\Content</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

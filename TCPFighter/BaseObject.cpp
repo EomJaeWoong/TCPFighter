@@ -87,11 +87,6 @@ void CBaseObject::SetOldPosition(int oldX, int oldY)
 
 void CBaseObject::SetPosition(int x, int y)
 {
-	if (x <= dfRANGE_MOVE_LEFT)		x = dfRANGE_MOVE_LEFT;
-	if (x >= dfRANGE_MOVE_RIGHT)	x = dfRANGE_MOVE_RIGHT;
-	if (y >= dfRANGE_MOVE_BOTTOM)	y = dfRANGE_MOVE_BOTTOM;
-	if (y <= dfRANGE_MOVE_TOP)		y = dfRANGE_MOVE_TOP;
-
 	SetOldPosition(m_iCurX, m_iCurY);
 	SetCurPosition(x, y);
 }
