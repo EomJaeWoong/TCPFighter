@@ -133,7 +133,6 @@ BOOL recvProc_MoveStart(CNPacket *pPacket)
 
 	if (oIter != g_Object.end())
 	{
-		//((CPlayerObject *)oIter->second)->SetActionMove(Direction);
 		oIter->second->ActionInput(Direction);
 		oIter->second->SetPosition(X, Y);
 
@@ -163,7 +162,6 @@ BOOL recvProc_MoveStop(CNPacket *pPacket)
 
 	if (oIter != g_Object.end())
 	{
-		//((CPlayerObject *)oIter->second)->SetActionStand();
 		oIter->second->ActionInput(dfACTION_STAND);
 		((CPlayerObject *)oIter->second)->SetDirection(Direction);
 		oIter->second->SetPosition(X, Y);
@@ -282,6 +280,31 @@ BOOL recvProc_Damage(CNPacket *pPacket)
 	if (DamageIter != g_Object.end())
 	{
 		((CPlayerObject *)DamageIter->second)->SetHP(DamageHP);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+//------------------------------------------------------------------------------
+// 동기화(캐릭터 좌표 보정)
+//------------------------------------------------------------------------------
+BOOL recvProc_Sync(CNPacket *pPacket)
+{
+	ObjectsIter		oIter;
+	unsigned int		ID;
+	short			X;
+	short			Y;
+
+	*pPacket >> ID;
+	*pPacket >> X;
+	*pPacket >> Y;
+
+	oIter = g_Object.find(ID);
+
+	if (oIter != g_Object.end())
+	{
+		oIter->second->SetPosition(X, Y);
 		return TRUE;
 	}
 

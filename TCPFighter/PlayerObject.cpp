@@ -75,19 +75,11 @@ void CPlayerObject::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth, int
 {
 	int iDrawX = GetCurX() - g_cTileMap.GetDrawPosX();
 	int	iDrawY = GetCurY() - g_cTileMap.GetDrawPosY();
-	
-	if (GetCurX() < dfSCREEN_WIDTH / 2)					iDrawX = GetCurX();
-	if (GetCurY() < dfSCREEN_HEIGHT / 2 + 20)			iDrawY = GetCurY();
-	if (GetCurX() + dfSCREEN_WIDTH / 2 > dfMAP_WIDTH)	
-		iDrawX = dfSCREEN_WIDTH - (dfMAP_WIDTH - GetCurX());
-	if (GetCurY() + dfSCREEN_HEIGHT / 2 - 20 > dfMAP_HEIGHT)
-		iDrawY = dfSCREEN_HEIGHT - (dfMAP_HEIGHT - GetCurY());
 
 	pSprite->DrawSprite50(eSHADOW, iDrawX, iDrawY, bypDest, iDestWidth, iDestHeight, iDestPitch);
 	
 	if (m_bPlayerCharacter)
 		pSprite->DrawSpriteRed(GetSprite(), iDrawX, iDrawY, bypDest, iDestWidth, iDestHeight, iDestPitch);
-
 	else
 		pSprite->DrawSprite(GetSprite(), iDrawX, iDrawY, bypDest, iDestWidth, iDestHeight, iDestPitch);
 
@@ -109,7 +101,7 @@ void CPlayerObject::InputActionProc()
 	case dfACTION_MOVE_LL :														//왼쪽
 		SetActionMove(dfACTION_MOVE_LL);
 
-		if (isPlayer() && GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT)
+		if (GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT)
 			SetPosition(GetCurX(), GetCurY());
 		else
 			SetPosition(GetCurX() - dfSPEED_PLAYER_X, GetCurY());
@@ -119,7 +111,7 @@ void CPlayerObject::InputActionProc()
 	case dfACTION_MOVE_RR :														//오른쪽
 		SetActionMove(dfACTION_MOVE_RR);
 
-		if (isPlayer() && GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT)
+		if (GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT)
 			SetPosition(GetCurX(), GetCurY());
 		else
 			SetPosition(GetCurX() + dfSPEED_PLAYER_X, GetCurY());
@@ -129,7 +121,7 @@ void CPlayerObject::InputActionProc()
 	case dfACTION_MOVE_DD:														//아래
 		SetActionMove(dfACTION_MOVE_DD);
 
-		if (isPlayer() && GetCurY() + dfSPEED_PLAYER_Y >= dfRANGE_MOVE_BOTTOM)
+		if (GetCurY() + dfSPEED_PLAYER_Y >= dfRANGE_MOVE_BOTTOM)
 			SetPosition(GetCurX(), GetCurY());
 		else
 			SetPosition(GetCurX(), GetCurY() + dfSPEED_PLAYER_Y);
@@ -139,7 +131,7 @@ void CPlayerObject::InputActionProc()
 	case dfACTION_MOVE_UU :														//위
 		SetActionMove(dfACTION_MOVE_UU);
 
-		if (isPlayer() && GetCurY() - dfSPEED_PLAYER_Y <= dfRANGE_MOVE_TOP)
+		if (GetCurY() - dfSPEED_PLAYER_Y <= dfRANGE_MOVE_TOP)
 			SetPosition(GetCurX(), GetCurY());
 		else
 			SetPosition(GetCurX(), GetCurY() - dfSPEED_PLAYER_Y);
@@ -149,7 +141,7 @@ void CPlayerObject::InputActionProc()
 	case dfACTION_MOVE_LD :														//왼쪽아래
 		SetActionMove(dfACTION_MOVE_LD);
 
-		if (isPlayer() && (GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT) ||
+		if ((GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT) ||
 			(GetCurY() + dfSPEED_PLAYER_Y >= dfRANGE_MOVE_BOTTOM))
 			SetPosition(GetCurX(), GetCurY());
 		else
@@ -160,7 +152,7 @@ void CPlayerObject::InputActionProc()
 	case dfACTION_MOVE_LU :														//왼쪽위
 		SetActionMove(dfACTION_MOVE_LU);
 
-		if (isPlayer() && (GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT) ||
+		if ((GetCurX() - dfSPEED_PLAYER_X <= dfRANGE_MOVE_LEFT) ||
 			(GetCurY() - dfSPEED_PLAYER_Y <= dfRANGE_MOVE_TOP)) 
 			SetPosition(GetCurX(), GetCurY());
 		else
@@ -171,7 +163,7 @@ void CPlayerObject::InputActionProc()
 	case dfACTION_MOVE_RD :														//오른쪽아래
 		SetActionMove(dfACTION_MOVE_RD);
 
-		if (isPlayer() && (GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT) ||
+		if ((GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT) ||
 			(GetCurY() + dfSPEED_PLAYER_Y >= dfRANGE_MOVE_BOTTOM))
 			SetPosition(GetCurX(), GetCurY());
 		else
@@ -182,7 +174,7 @@ void CPlayerObject::InputActionProc()
 	case dfACTION_MOVE_RU :														//오른쪽 위
 		SetActionMove(dfACTION_MOVE_RU);
 
-		if (isPlayer() && (GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT) ||
+		if ((GetCurX() + dfSPEED_PLAYER_X >= dfRANGE_MOVE_RIGHT) ||
 			(GetCurY() - dfSPEED_PLAYER_Y <= dfRANGE_MOVE_TOP))
 			SetPosition(GetCurX(), GetCurY());
 		else

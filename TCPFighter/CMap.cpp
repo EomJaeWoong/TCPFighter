@@ -30,19 +30,6 @@ CMap::~CMap()
 /*------------------------------------------------------------------------------------------------*/
 void CMap::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth, int iDestHeight, int iDestPitch)
 {
-	int iDrawX = m_iDrawPosX;
-	int iDrawY = m_iDrawPosY;
-
-	//----------------------------------------------------------------------------------------------
-	// 클리핑
-	//----------------------------------------------------------------------------------------------
-	if (m_iDrawPosX < 0)	iDrawX = 0;
-	if (m_iDrawPosY < 0)	iDrawY = 0;
-	if (m_iDrawPosX + dfSCREEN_WIDTH > dfMAP_WIDTH)
-		iDrawX = dfMAP_WIDTH - dfSCREEN_WIDTH;
-	if (m_iDrawPosY + dfSCREEN_HEIGHT > dfMAP_HEIGHT)
-		iDrawY = dfMAP_HEIGHT - dfSCREEN_HEIGHT;
-
 	//----------------------------------------------------------------------------------------------
 	// 그리기
 	//----------------------------------------------------------------------------------------------
@@ -50,7 +37,7 @@ void CMap::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth, int iDestHei
 	{
 		for (int iCntX = 0; iCntX < 11; iCntX++)
 		{
-			pSprite->DrawImage(eMAP, (iCntX * 64) - (iDrawX % 64), iCntY * 64 - (iDrawY % 64),
+			pSprite->DrawImage(eMAP, (iCntX * 64) - (m_iDrawPosX % 64), iCntY * 64 - (m_iDrawPosY % 64),
 				bypDest, iDestWidth, iDestHeight, iDestPitch);
 		}
 	}
@@ -63,4 +50,11 @@ void CMap::SetDrawPos(int iDrawPosX, int iDrawPosY)
 {
 	m_iDrawPosX = iDrawPosX - dfSCREEN_WIDTH / 2;
 	m_iDrawPosY = iDrawPosY - dfSCREEN_HEIGHT / 2 - 20;
+
+	if (iDrawPosX < dfSCREEN_WIDTH / 2)					m_iDrawPosX = 0;
+	if (iDrawPosY < dfSCREEN_HEIGHT / 2 + 20)			m_iDrawPosY = 0;
+	if (iDrawPosX + dfSCREEN_WIDTH / 2 > dfMAP_WIDTH)
+		m_iDrawPosX = dfMAP_WIDTH - dfSCREEN_WIDTH;
+	if (iDrawPosY + dfSCREEN_HEIGHT / 2 - 20 > dfMAP_HEIGHT)
+		m_iDrawPosY = dfMAP_HEIGHT - dfSCREEN_HEIGHT;
 }

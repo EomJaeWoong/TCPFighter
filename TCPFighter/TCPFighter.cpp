@@ -308,7 +308,6 @@ void Update_Game(void)
 		KeyProcess();
 
 	Action();
-	WriteProc();
 
 	if (g_FrameSkip.FrameSkip())
 	{
@@ -358,7 +357,10 @@ void Action()
 	ObjectsIter oIter;
 
 	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
+	{
 		oIter->second->Action(1);
+		WriteProc();
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TileMap 좌표 지정
@@ -556,11 +558,11 @@ BOOL ReadProc()
 				// 데미지
 				/////////////////////////////////////////////////////////////////////////////////////////
 			case dfPACKET_SC_DAMAGE:
-				return recvProc_Damage(&cPacket);
+				recvProc_Damage(&cPacket);
 				break;
 
 			case dfPACKET_SC_SYNC:
-				return TRUE;
+				recvProc_Sync(&cPacket);
 				break;
 			}
 		}

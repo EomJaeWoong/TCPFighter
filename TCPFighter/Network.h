@@ -17,7 +17,7 @@ BOOL recvProc_Attack1(CNPacket *pPacket);
 BOOL recvProc_Attack2(CNPacket *pPacket);
 BOOL recvProc_Attack3(CNPacket *pPacket);
 BOOL recvProc_Damage(CNPacket *pPacket);
-
+BOOL recvProc_Sync(CNPacket *pPacket);
 /*----------------------------------------------------------------------------*/
 // Send Packet
 /*----------------------------------------------------------------------------*/
