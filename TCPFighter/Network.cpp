@@ -133,6 +133,7 @@ BOOL recvProc_MoveStart(CNPacket *pPacket)
 
 	if (oIter != g_Object.end())
 	{
+		//((CPlayerObject *)oIter->second)->SetActionMove(Direction);
 		oIter->second->ActionInput(Direction);
 		oIter->second->SetPosition(X, Y);
 
@@ -162,7 +163,9 @@ BOOL recvProc_MoveStop(CNPacket *pPacket)
 
 	if (oIter != g_Object.end())
 	{
+		//((CPlayerObject *)oIter->second)->SetActionStand();
 		oIter->second->ActionInput(dfACTION_STAND);
+		((CPlayerObject *)oIter->second)->SetDirection(Direction);
 		oIter->second->SetPosition(X, Y);
 
 		return TRUE;
