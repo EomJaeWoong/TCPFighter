@@ -304,6 +304,8 @@ void InitialGame()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Update_Game(void)
 {
+	timeBeginPeriod(1);
+
 	if (g_bActiveApp)
 		KeyProcess();
 
@@ -314,6 +316,8 @@ void Update_Game(void)
 		Draw();
 		g_cScreenDib.DrawBuffer(g_hWnd);
 	}
+
+	timeBeginPeriod(1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -444,6 +448,7 @@ BOOL ReadProc()
 {
 	st_NETWORK_PACKET_HEADER Header;
 	CNPacket cPacket;
+
 	while (1){
 		retval = recv(client_sock, RecvQ.GetWriteBufferPtr(), RecvQ.GetNotBrokenPutSize(), 0);
 
@@ -575,6 +580,7 @@ BOOL ReadProc()
 void WriteProc()
 {
 	int retval;
+
 	while (1){
 		retval = send(client_sock, SendQ.GetReadBufferPtr(), SendQ.GetNotBrokenGetSize(), 0);
 

@@ -21,6 +21,10 @@
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 #include <map>
+#include <mmsystem.h>
+
+#pragma comment (lib, "winmm.lib")
+#pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
 

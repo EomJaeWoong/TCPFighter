@@ -72,8 +72,8 @@ BOOL recvProc_CreateOtherCharacter(CNPacket *pPacket)
 
 	unsigned int	ID;
 	BYTE			Direction;
-	short			X;
-	short			Y;
+	short		X;
+	short		Y;
 	BYTE			HP;
 
 	*pPacket >> ID;
