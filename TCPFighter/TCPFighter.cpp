@@ -16,7 +16,7 @@ CBaseObject *g_pPlayerObject;
 /*----------------------------------------------------------------------------*/
 // 오브젝트들(플레이어, 이펙트)
 /*----------------------------------------------------------------------------*/
-Objects g_Object;
+Object g_Object;
 
 /*----------------------------------------------------------------------------*/
 // 스크린과 스프라이트
@@ -46,6 +46,10 @@ BOOL g_bActiveApp;
 CAyaStreamSQ SendQ(10000);
 CAyaStreamSQ RecvQ(10000);
 
+DWORD g_dwFrameCount = 0;
+DWORD g_dwStartTick = 0 ;
+DWORD g_dwEndTick = 0;
+
 int retval; 
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
@@ -64,6 +68,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPTSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+	timeBeginPeriod(1);
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -203,6 +209,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
+
+	timeBeginPeriod(1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -313,6 +321,22 @@ void Update_Game(void)
 
 	if (g_FrameSkip.FrameSkip())
 	{
+		if (g_dwStartTick == 0)	g_dwStartTick = timeGetTime();
+		if (timeGetTime() - g_dwStartTick >= 1000)
+		{
+			if (g_pPlayerObject != NULL)
+			{
+				HDC hdc = GetDC(g_hWnd);
+				WCHAR point[30];
+				wsprintf(point, L"%d, %d, %d", g_pPlayerObject->GetCurX(), g_pPlayerObject->GetCurY(),
+					g_dwFrameCount);
+				TextOut(hdc, 0, 480, point, wcslen(point));
+				ReleaseDC(g_hWnd, hdc);
+			}
+			g_dwFrameCount = 0;
+			g_dwStartTick = timeGetTime();
+		}
+		g_dwFrameCount++;
 		Draw();
 		g_cScreenDib.DrawBuffer(g_hWnd);
 	}
@@ -358,11 +382,12 @@ void KeyProcess()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Action()
 {
-	ObjectsIter oIter;
-
+	Object::iterator oIter;
 	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		oIter->second->Action(1);
+		CBaseObject *pBaseObject = (*oIter);
+
+		pBaseObject->Action(1);
 		WriteProc();
 	}
 
@@ -386,59 +411,21 @@ void Draw()
 	int iDestHeight = g_cScreenDib.GetHeight();
 	int iDestPitch = g_cScreenDib.GetPitch();	
 
-	if (g_pPlayerObject != NULL)
-	{
-		HDC hdc = GetDC(g_hWnd);
-		WCHAR point[20];
-		wsprintf(point, L"%d, %d", g_pPlayerObject->GetCurX(), g_pPlayerObject->GetCurY());
-		TextOut(hdc, 0, 0, point, wcslen(point));
-		ReleaseDC(g_hWnd, hdc);
-	}
 	g_cTileMap.Draw(g_pSpriteDib, bypDest, iDestWidth, iDestHeight, iDestPitch);
-
-	ObjectsIter oIter;
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Effect, Player 정렬
-	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*
-	for (int iCnt = 0; iCnt < MAX_OBJECT - 1; iCnt++)
-	{
-		for (int iCnt2 = 0; iCnt2 < MAX_OBJECT - 1 - iCnt; iCnt2++)
-		{
-			if (gObject[iCnt2] != NULL && gObject[iCnt2 + 1] != NULL &&
-				gObject[iCnt2]->GetObjectType() == eTYPE_EFFECT && gObject[iCnt]->GetObjectType() == eTYPE_PLAYER)
-			{
-				CBaseObject *pTemp;
-				pTemp = gObject[iCnt2];
-				gObject[iCnt2] = gObject[iCnt2 + 1];
-				gObject[iCnt2 + 1] = pTemp;
-			}
-		}
-	}
-	
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Y축 정렬
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	for (int iCnt = 0; iCnt < MAX_OBJECT - 1; iCnt++)
-	{
-		for (int iCnt2 = 0; iCnt2 < MAX_OBJECT - 1 - iCnt; iCnt2++)
-		{
-			if (gObject[iCnt2] != NULL && gObject[iCnt2+1] != NULL &&
-				gObject[iCnt2]->GetCurY() > gObject[iCnt2 + 1]->GetCurY())
-			{
-				CBaseObject *pTemp;
-				pTemp = gObject[iCnt2];
-				gObject[iCnt2] = gObject[iCnt2 + 1];
-				gObject[iCnt2 + 1] = pTemp;
-			}
-		}
-	}
-	*/
+	g_Object.sort(GreaterY());
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Effect, Player 정렬
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	Object::iterator oIter;
 	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
-		oIter->second->Draw(g_pSpriteDib, bypDest, iDestWidth, iDestHeight, iDestPitch);
+		(*oIter)->Draw(g_pSpriteDib, bypDest, iDestWidth, iDestHeight, iDestPitch);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

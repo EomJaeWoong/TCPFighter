@@ -40,12 +40,10 @@ BOOL InitialNetwork(SOCKET *sock, HWND *hWnd)
 //------------------------------------------------------------------------------
 BOOL recvProc_CreateMyCharacter(CNPacket *pPacket)
 {
-	pair<ObjectsIter, BOOL> mResult;
-
 	unsigned int	ID;
 	BYTE			Direction;
-	short			X;
-	short			Y;
+	short		X;
+	short		Y;
 	BYTE			HP;
 
 	*pPacket >> ID;
@@ -55,9 +53,10 @@ BOOL recvProc_CreateMyCharacter(CNPacket *pPacket)
 	*pPacket >> HP;
 
 	g_pPlayerObject = new CPlayerObject(TRUE, ID, eTYPE_PLAYER, HP, Direction);
+	g_pPlayerObject->SetOldPosition(X, Y);
 	g_pPlayerObject->SetPosition(X, Y);
 
-	mResult = g_Object.insert(pair<DWORD, CBaseObject *>(ID, g_pPlayerObject));
+	g_Object.push_back(g_pPlayerObject);
 
 	return TRUE;
 }
@@ -67,7 +66,6 @@ BOOL recvProc_CreateMyCharacter(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_CreateOtherCharacter(CNPacket *pPacket)
 {
-	pair<ObjectsIter, BOOL> mResult;
 	CPlayerObject *pPlayerObject;
 
 	unsigned int	ID;
@@ -85,9 +83,9 @@ BOOL recvProc_CreateOtherCharacter(CNPacket *pPacket)
 	pPlayerObject = new CPlayerObject(FALSE, ID, eTYPE_PLAYER, HP, Direction);
 	pPlayerObject->SetPosition(X, Y);
 
-	mResult = g_Object.insert(pair<DWORD, CBaseObject *>(ID, pPlayerObject));
+	g_Object.push_back(pPlayerObject);
 
-	return mResult.second;
+	return TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -95,19 +93,19 @@ BOOL recvProc_CreateOtherCharacter(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_DeleteCharacter(CNPacket *pPacket)
 {
-	ObjectsIter oIter;
+	Object::iterator oIter;
 	unsigned int	ID;
 
 	*pPacket >> ID;
 
-	oIter = g_Object.find(ID);
-	
-	if (oIter != g_Object.end())
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		delete oIter->second;
-		g_Object.erase(ID);
+		if (ID == (*oIter)->GetObjectID()){
+			delete (*oIter);
+			g_Object.erase(oIter);
 
-		return TRUE;
+			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -118,7 +116,7 @@ BOOL recvProc_DeleteCharacter(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_MoveStart(CNPacket *pPacket)
 {
-	ObjectsIter		oIter;
+	Object::iterator oIter;
 	unsigned int	ID;
 	BYTE			Direction;
 	short			X;
@@ -129,14 +127,14 @@ BOOL recvProc_MoveStart(CNPacket *pPacket)
 	*pPacket >> X;
 	*pPacket >> Y;
 
-	oIter = g_Object.find(ID);
-
-	if (oIter != g_Object.end())
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		oIter->second->ActionInput(Direction);
-		oIter->second->SetPosition(X, Y);
+		if (ID == (*oIter)->GetObjectID()){
+			(*oIter)->ActionInput(Direction);
+			(*oIter)->SetPosition(X, Y);
 
-		return TRUE;
+			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -147,26 +145,26 @@ BOOL recvProc_MoveStart(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_MoveStop(CNPacket *pPacket)
 {
-	ObjectsIter		oIter;
+	Object::iterator oIter;
 	unsigned int	ID;
 	BYTE			Direction;
-	short			X;
-	short			Y;
+	short		X;
+	short		Y;
 
 	*pPacket >> ID;
 	*pPacket >> Direction;
 	*pPacket >> X;
 	*pPacket >> Y;
 
-	oIter = g_Object.find(ID);
-
-	if (oIter != g_Object.end())
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		oIter->second->ActionInput(dfACTION_STAND);
-		((CPlayerObject *)oIter->second)->SetDirection(Direction);
-		oIter->second->SetPosition(X, Y);
+		if (ID == (*oIter)->GetObjectID()){
+			(*oIter)->ActionInput(dfACTION_STAND);
+			((CPlayerObject *)(*oIter))->SetDirection(Direction);
+			(*oIter)->SetPosition(X, Y);
 
-		return TRUE;
+			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -177,7 +175,7 @@ BOOL recvProc_MoveStop(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_Attack1(CNPacket *pPacket)
 {
-	ObjectsIter		oIter;
+	Object::iterator oIter;
 	unsigned int	ID;
 	BYTE			Direction;
 	short			X;
@@ -188,14 +186,14 @@ BOOL recvProc_Attack1(CNPacket *pPacket)
 	*pPacket >> X;
 	*pPacket >> Y;
 
-	oIter = g_Object.find(ID);
-
-	if (oIter != g_Object.end())
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		oIter->second->ActionInput(dfACTION_ATTACK1);
-		oIter->second->SetPosition(X, Y);
+		if (ID == (*oIter)->GetObjectID()){
+			(*oIter)->ActionInput(dfACTION_ATTACK1);
+			(*oIter)->SetPosition(X, Y);
 
-		return TRUE;
+			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -206,7 +204,7 @@ BOOL recvProc_Attack1(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_Attack2(CNPacket *pPacket)
 {
-	ObjectsIter		oIter;
+	Object::iterator oIter;
 	unsigned int	ID;
 	BYTE			Direction;
 	short			X;
@@ -217,14 +215,14 @@ BOOL recvProc_Attack2(CNPacket *pPacket)
 	*pPacket >> X;
 	*pPacket >> Y;
 
-	oIter = g_Object.find(ID);
-
-	if (oIter != g_Object.end())
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		oIter->second->ActionInput(dfACTION_ATTACK2);
-		oIter->second->SetPosition(X, Y);
+		if (ID == (*oIter)->GetObjectID()){
+			(*oIter)->ActionInput(dfACTION_ATTACK2);
+			(*oIter)->SetPosition(X, Y);
 
-		return TRUE;
+			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -235,7 +233,7 @@ BOOL recvProc_Attack2(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_Attack3(CNPacket *pPacket)
 {
-	ObjectsIter		oIter;
+	Object::iterator oIter;
 	unsigned int	ID;
 	BYTE			Direction;
 	short			X;
@@ -246,14 +244,14 @@ BOOL recvProc_Attack3(CNPacket *pPacket)
 	*pPacket >> X;
 	*pPacket >> Y;
 
-	oIter = g_Object.find(ID);
-
-	if (oIter != g_Object.end())
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		oIter->second->ActionInput(dfACTION_ATTACK3);
-		oIter->second->SetPosition(X, Y);
+		if (ID == (*oIter)->GetObjectID()){
+			(*oIter)->ActionInput(dfACTION_ATTACK3);
+			(*oIter)->SetPosition(X, Y);
 
-		return TRUE;
+			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -264,7 +262,7 @@ BOOL recvProc_Attack3(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_Damage(CNPacket *pPacket)
 {
-	ObjectsIter		DamageIter;
+	Object::iterator oIter;
 	unsigned int	AttackID;
 	unsigned int	DamageID;
 	BYTE			DamageHP;
@@ -275,12 +273,12 @@ BOOL recvProc_Damage(CNPacket *pPacket)
 
 	//ÀÌÆåÆ® ³Ö±â
 
-	DamageIter = g_Object.find(DamageID);
-
-	if (DamageIter != g_Object.end())
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		((CPlayerObject *)DamageIter->second)->SetHP(DamageHP);
-		return TRUE;
+		if (DamageID == (*oIter)->GetObjectID()){
+			((CPlayerObject *)(*oIter))->SetHP(DamageHP);
+			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -291,7 +289,7 @@ BOOL recvProc_Damage(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_Sync(CNPacket *pPacket)
 {
-	ObjectsIter		oIter;
+	Object::iterator oIter;
 	unsigned int		ID;
 	short			X;
 	short			Y;
@@ -300,12 +298,12 @@ BOOL recvProc_Sync(CNPacket *pPacket)
 	*pPacket >> X;
 	*pPacket >> Y;
 
-	oIter = g_Object.find(ID);
-
-	if (oIter != g_Object.end())
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 	{
-		oIter->second->SetPosition(X, Y);
-		return TRUE;
+		if (ID == (*oIter)->GetObjectID()){
+			(*oIter)->SetPosition(X, Y);
+			return TRUE;
+		}
 	}
 
 	return FALSE;

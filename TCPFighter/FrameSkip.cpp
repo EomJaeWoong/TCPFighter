@@ -16,9 +16,9 @@ CFrameSkip::~CFrameSkip()
 BOOL CFrameSkip::FrameSkip()
 {
 	if (m_dwSystemTick == 0)
-		m_dwSystemTick = GetTickCount();
+		m_dwSystemTick = timeGetTime();
 
-	m_iOneFrameTick = GetTickCount() - m_dwSystemTick;
+	m_iOneFrameTick = timeGetTime() - m_dwSystemTick;
 
 	if (m_iTick > m_iMaxFPS)
 	{
@@ -29,11 +29,11 @@ BOOL CFrameSkip::FrameSkip()
 	if (m_iOneFrameTick < m_iMaxFPS)	Sleep((m_iMaxFPS - m_iOneFrameTick));
 	else
 	{
-		m_iTick = m_iOneFrameTick;
+		m_iTick = m_iOneFrameTick - m_iMaxFPS;
 		Sleep(m_iMaxFPS);
 	}
 
-	m_dwSystemTick = GetTickCount();
+	m_dwSystemTick = timeGetTime();
 	
 	return TRUE;
 }

@@ -101,4 +101,3 @@ void CBaseObject::SetSprite(int iSpriteStart, int iSpriteEnd, int iFrameDelay)
 	m_iDelayCount = 0;
 	m_bEndFrame = FALSE;
 }
-

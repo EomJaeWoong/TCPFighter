@@ -20,7 +20,7 @@
 #include <tchar.h>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
-#include <map>
+#include <list>
 #include <mmsystem.h>
 
 #pragma comment (lib, "winmm.lib")
@@ -43,13 +43,12 @@ using namespace std;
 #include "FrameSkip.h"
 #include "CMap.h"
 
-#define Objects			map<DWORD, CBaseObject *>
-#define ObjectsIter		Objects::iterator
+typedef list<CBaseObject *> Object;
 
 extern CAyaStreamSQ SendQ;
 extern CAyaStreamSQ RecvQ;
 
-extern Objects g_Object;
+extern Object g_Object;
 extern CBaseObject *g_pPlayerObject;
 
 extern CMap g_cTileMap;
