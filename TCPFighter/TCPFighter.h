@@ -10,3 +10,10 @@ struct GreaterY
 	}
 };
 
+struct EffectOrPlayer
+{
+	bool operator() (CBaseObject *left, CBaseObject *right) const
+	{
+		return left->GetObjectType() < right->GetObjectType();
+	}
+};

@@ -383,11 +383,17 @@ void KeyProcess()
 void Action()
 {
 	Object::iterator oIter;
-	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
+	for (oIter = g_Object.begin(); oIter != g_Object.end(); )
 	{
 		CBaseObject *pBaseObject = (*oIter);
+		
+		if (!pBaseObject->Action(pBaseObject->GetObjectID()))	oIter++;
+		else
+		{
+			delete pBaseObject;
+			g_Object.erase(oIter++);
+		}
 
-		pBaseObject->Action(1);
 		WriteProc();
 	}
 
@@ -422,7 +428,8 @@ void Draw()
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Effect, Player Á¤·Ä
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+	g_Object.sort(EffectOrPlayer());
+
 	Object::iterator oIter;
 	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
 		(*oIter)->Draw(g_pSpriteDib, bypDest, iDestWidth, iDestHeight, iDestPitch);

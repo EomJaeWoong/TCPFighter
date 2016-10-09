@@ -2,6 +2,10 @@
 #include "BaseObject.h"
 #include "PlayerObject.h"
 
+/*---------------------------------------------------------------------------------------------------------*/
+// 생성자
+// 생성되는 캐릭터에 대한 셋팅
+/*---------------------------------------------------------------------------------------------------------*/
 CPlayerObject::CPlayerObject(BOOL PlayerCharacter, int iObjectID, int iObjectType, char chHP, int iDirection)
 	: CBaseObject(iObjectID, iObjectType), m_bPlayerCharacter(PlayerCharacter), m_chHP(chHP),
 	m_dwActionCur(dfACTION_STAND),
@@ -9,6 +13,7 @@ CPlayerObject::CPlayerObject(BOOL PlayerCharacter, int iObjectID, int iObjectTyp
 	m_iDirCur(iDirection), 
 	m_iDirOld(iDirection)
 {
+	ActionInput(dfACTION_STAND);
 	if (iDirection == dfACTION_MOVE_RR)
 		SetSprite(ePLAYER_STAND_R01, ePLAYER_STAND_R_MAX, 5);
 	else if (iDirection == dfACTION_MOVE_LL)

@@ -262,7 +262,7 @@ BOOL recvProc_Attack3(CNPacket *pPacket)
 //------------------------------------------------------------------------------
 BOOL recvProc_Damage(CNPacket *pPacket)
 {
-	Object::iterator oIter;
+	Object::iterator damageIter;
 	unsigned int	AttackID;
 	unsigned int	DamageID;
 	BYTE			DamageHP;
@@ -271,13 +271,22 @@ BOOL recvProc_Damage(CNPacket *pPacket)
 	*pPacket >> DamageID;
 	*pPacket >> DamageHP;
 
-	//ÀÌÆåÆ® ³Ö±â
-
-	for (oIter = g_Object.begin(); oIter != g_Object.end(); ++oIter)
+	for (damageIter = g_Object.begin(); damageIter != g_Object.end(); ++damageIter)
 	{
-		if (DamageID == (*oIter)->GetObjectID()){
-			((CPlayerObject *)(*oIter))->SetHP(DamageHP);
-			return TRUE;
+		if (eTYPE_PLAYER == (*damageIter)->GetObjectType())
+		{
+			CPlayerObject *pDamagePlayer = (CPlayerObject *)(*damageIter);
+		
+			if (DamageID == (*damageIter)->GetObjectID())
+			{
+				CBaseObject *pEffectObject = new CEffectObject(0, eTYPE_EFFECT,
+					pDamagePlayer->GetCurX(), pDamagePlayer->GetCurY() - 70,
+					4, eEFFECT_SPARK_01, eEFFECT_SPARK_04);
+				g_Object.push_back(pEffectObject);
+
+				pDamagePlayer->SetHP(DamageHP);
+				return TRUE;
+			}
 		}
 	}
 

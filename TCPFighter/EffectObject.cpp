@@ -17,10 +17,12 @@ CEffectObject::~CEffectObject()
 
 DWORD CEffectObject::Action(DWORD dwParam)
 {
+	m_dwAttackID = dwParam;
+
+	NextFrame();
 	if (isEndFrame())
 		return TRUE;
 
-	NextFrame();
 	return FALSE;
 }
 
