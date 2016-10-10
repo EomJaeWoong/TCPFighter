@@ -29,6 +29,9 @@ DWORD CEffectObject::Action(DWORD dwParam)
 void CEffectObject::Draw(CSpriteDib *pSprite, BYTE* bypDest, int iDestWidth
 	, int iDestHeight, int iDestPitch)
 {
-	pSprite->DrawSprite(GetSprite(), GetCurX(), GetCurY(), bypDest
+	int iDrawX = GetCurX() - g_cTileMap.GetDrawPosX();
+	int	iDrawY = GetCurY() - g_cTileMap.GetDrawPosY();
+
+	pSprite->DrawSprite(GetSprite(), iDrawX, iDrawY, bypDest
 		, iDestWidth, iDestHeight, iDestPitch);
 }
